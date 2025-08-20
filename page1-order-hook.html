@@ -308,9 +308,8 @@
 
         /* Bottom Section */
         .bottom-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
+            display: flex;
+            justify-content: center;
             align-items: center;
         }
 
@@ -345,42 +344,6 @@
             margin-top: 0.5rem;
         }
 
-        .student-input {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--accent);
-        }
-
-        .student-input__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 0.75rem;
-            text-align: center;
-        }
-
-        .student-input__field {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: inherit;
-            resize: none;
-            transition: border-color var(--transition);
-        }
-
-        .student-input__field:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-        .student-input__field::placeholder {
-            color: var(--text-light);
-        }
 
         /* Transition Message */
         .transition-message {
@@ -417,10 +380,6 @@
                 font-size: 2.5rem;
             }
 
-            .bottom-section {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
 
             .header__title {
                 font-size: 1.25rem;
@@ -558,15 +517,6 @@
                     </p>
                 </div>
 
-                <div class="student-input">
-                    <h3 class="student-input__title">💭 생각해보기</h3>
-                    <textarea 
-                        class="student-input__field" 
-                        rows="3" 
-                        placeholder="여러분 일상에서 '순서가 바뀌면 곤란'한 것 한 가지를 적어보세요!&#10;예) 옷 입는 순서, 양치하는 순서..."
-                        aria-label="순서가 중요한 일상 사례 입력"
-                    ></textarea>
-                </div>
             </section>
         </main>
 
@@ -581,12 +531,10 @@
 
         // DOM Elements
         const scenarios = document.querySelectorAll('.scenario');
-        const studentInput = document.querySelector('.student-input__field');
         const transitionMessage = document.getElementById('transition-message');
 
         // State
         let selectedScenarios = new Set();
-        let inputTimer = null;
 
         // Scenario interaction
         function toggleScenario(scenario) {
@@ -611,10 +559,9 @@
 
         // Check if ready to show transition
         function checkProgress() {
-            const hasInput = studentInput.value.trim().length > 5;
-            const hasScenario = selectedScenarios.size > 0;
+            const hasScenario = selectedScenarios.size >= 2;
             
-            if (hasInput && hasScenario) {
+            if (hasScenario) {
                 showTransitionMessage();
             }
         }
@@ -638,16 +585,9 @@
             });
         });
 
-        // Input monitoring with debounce
-        studentInput.addEventListener('input', () => {
-            clearTimeout(inputTimer);
-            inputTimer = setTimeout(checkProgress, 500);
-        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target === studentInput) return;
-            
             switch(e.key) {
                 case '1':
                     e.preventDefault();

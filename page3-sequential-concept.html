@@ -425,45 +425,6 @@
             margin-top: 0.5rem;
         }
 
-        .check-question {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--pink);
-            text-align: center;
-        }
-
-        .check-question__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--pink);
-            margin-bottom: 0.75rem;
-        }
-
-        .check-question__content {
-            font-size: 0.875rem;
-            color: var(--text);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .check-question__input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: inherit;
-            resize: none;
-            transition: border-color var(--transition);
-        }
-
-        .check-question__input:focus {
-            outline: none;
-            border-color: var(--pink);
-            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
-        }
 
         /* Transition Message */
         .transition-message {
@@ -683,18 +644,6 @@
                     </p>
                 </div>
 
-                <div class="check-question">
-                    <h3 class="check-question__title">🤔 생각해보기</h3>
-                    <p class="check-question__content">
-                        시간표에서 '수학→체육'과<br>'체육→수학'은 뭐가 다를까요?
-                    </p>
-                    <textarea 
-                        class="check-question__input" 
-                        rows="2" 
-                        placeholder="여러분의 생각을 적어보세요..."
-                        aria-label="시간표 순서 차이에 대한 생각 입력"
-                    ></textarea>
-                </div>
             </section>
         </main>
 
@@ -709,12 +658,10 @@
 
         // DOM Elements
         const exampleCards = document.querySelectorAll('.example-card');
-        const checkInput = document.querySelector('.check-question__input');
         const transitionMessage = document.getElementById('transition-message');
 
         // State
         let activeCards = new Set();
-        let inputTimer = null;
 
         // Card interaction
         function toggleCard(card) {
@@ -742,10 +689,9 @@
 
         // Check progress
         function checkProgress() {
-            const hasActiveCards = activeCards.size >= 2; // At least 2 cards explored
-            const hasInput = checkInput.value.trim().length > 10; // Meaningful input
+            const hasActiveCards = activeCards.size >= 3; // At least 3 cards explored
             
-            if (hasActiveCards && hasInput) {
+            if (hasActiveCards) {
                 showTransitionMessage();
             }
         }
@@ -787,15 +733,9 @@
         });
 
         // Input monitoring with debounce
-        checkInput.addEventListener('input', () => {
-            clearTimeout(inputTimer);
-            inputTimer = setTimeout(checkProgress, 500);
-        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target === checkInput) return;
-            
             const cardIndex = parseInt(e.key) - 1;
             if (cardIndex >= 0 && cardIndex < exampleCards.length) {
                 e.preventDefault();

@@ -434,79 +434,6 @@
             color: white;
         }
 
-        /* Student Activity Modal */
-        .activity-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--transition);
-        }
-
-        .activity-modal.is-visible {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .activity-modal__content {
-            background: white;
-            border-radius: 1rem;
-            padding: 2rem;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: var(--shadow-lg);
-            transform: scale(0.9);
-            transition: transform var(--transition);
-        }
-
-        .activity-modal.is-visible .activity-modal__content {
-            transform: scale(1);
-        }
-
-        .activity-modal__title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-
-        .activity-modal__question {
-            font-size: 1rem;
-            color: var(--text);
-            margin-bottom: 1.5rem;
-            line-height: 1.5;
-        }
-
-        .activity-modal__input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-            transition: border-color var(--transition);
-        }
-
-        .activity-modal__input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .activity-modal__buttons {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-        }
 
         .btn {
             padding: 0.75rem 1.5rem;
@@ -727,20 +654,6 @@
             </section>
         </main>
 
-        <div class="activity-modal" id="activity-modal">
-            <div class="activity-modal__content">
-                <h3 class="activity-modal__title">🤔 생각해보기</h3>
-                <p class="activity-modal__question">
-                    오늘 다루는 네 가지 핵심 용어 중 하나만 말해보세요!<br>
-                    <small>(순차적, 인덱스, 연산, 정렬)</small>
-                </p>
-                <input type="text" class="activity-modal__input" placeholder="핵심 용어를 입력하세요..." maxlength="10">
-                <div class="activity-modal__buttons">
-                    <button class="btn btn--primary" id="submit-term">제출</button>
-                    <button class="btn btn--secondary" id="close-modal">닫기</button>
-                </div>
-            </div>
-        </div>
 
         <div class="transition-message" id="transition-message">
             🎉 훌륭해요! 그럼 <strong>순차적 데이터</strong>가 정확히 뭘까요?
@@ -755,17 +668,12 @@
         const goalCards = document.querySelectorAll('.goal-card');
         const timelineSteps = document.querySelectorAll('.timeline-step');
         const termChips = document.querySelectorAll('.term-chip');
-        const activityModal = document.getElementById('activity-modal');
-        const termInput = document.querySelector('.activity-modal__input');
-        const submitBtn = document.getElementById('submit-term');
-        const closeBtn = document.getElementById('close-modal');
         const transitionMessage = document.getElementById('transition-message');
 
         // State
         let selectedGoals = new Set();
         let selectedTerms = new Set();
         let currentStep = 0;
-        let activityCompleted = false;
 
         // Timeline animation
         function animateTimeline() {
@@ -814,44 +722,14 @@
             checkProgress();
         }
 
-        // Check progress and show modal
+        // Check progress
         function checkProgress() {
-            if (selectedGoals.size > 0 && selectedTerms.size > 0 && !activityCompleted) {
-                setTimeout(showActivityModal, 1000);
+            if (selectedGoals.size > 0 && selectedTerms.size >= 2) {
+                setTimeout(showTransitionMessage, 1000);
             }
         }
 
-        // Show activity modal
-        function showActivityModal() {
-            activityModal.classList.add('is-visible');
-            termInput.focus();
-        }
 
-        // Hide activity modal
-        function hideActivityModal() {
-            activityModal.classList.remove('is-visible');
-        }
-
-        // Submit term
-        function submitTerm() {
-            const value = termInput.value.trim().toLowerCase();
-            const validTerms = ['순차적', '인덱스', '연산', '정렬'];
-            
-            if (validTerms.some(term => value.includes(term))) {
-                activityCompleted = true;
-                hideActivityModal();
-                showTransitionMessage();
-                
-                // Animate timeline to completion
-                currentStep = timelineSteps.length - 1;
-                animateTimeline();
-            } else {
-                termInput.style.borderColor = '#EF4444';
-                setTimeout(() => {
-                    termInput.style.borderColor = '';
-                }, 1000);
-            }
-        }
 
         // Show transition message
         function showTransitionMessage() {
@@ -883,27 +761,9 @@
             chip.addEventListener('click', () => toggleTerm(chip));
         });
 
-        submitBtn.addEventListener('click', submitTerm);
-        closeBtn.addEventListener('click', hideActivityModal);
-
-        termInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                submitTerm();
-            }
-        });
-
-        // Close modal on escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && activityModal.classList.contains('is-visible')) {
-                hideActivityModal();
-            }
-        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (activityModal.classList.contains('is-visible')) return;
-            
             switch(e.key) {
                 case '1':
                     e.preventDefault();

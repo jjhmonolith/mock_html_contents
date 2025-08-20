@@ -486,7 +486,8 @@
         /* Bottom Section */
         .bottom-section {
             display: flex;
-            gap: 1rem;
+            justify-content: center;
+            align-items: center;
             flex-shrink: 0;
         }
 
@@ -522,46 +523,6 @@
             margin-top: 0.25rem;
         }
 
-        .check-question {
-            flex: 1;
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--primary);
-        }
-
-        .check-question__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-align: center;
-        }
-
-        .check-question__content {
-            font-size: 0.875rem;
-            color: var(--text);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .check-question__input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: inherit;
-            resize: none;
-            transition: border-color var(--transition);
-        }
-
-        .check-question__input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        }
 
         /* Transition Message */
         .transition-message {
@@ -597,9 +558,6 @@
                 grid-template-rows: repeat(4, 1fr);
             }
 
-            .bottom-section {
-                flex-direction: column;
-            }
 
             .action-buttons {
                 flex-direction: column;
@@ -736,19 +694,6 @@
                     </p>
                 </div>
 
-                <div class="check-question">
-                    <h3 class="check-question__title">🤔 생각해보기</h3>
-                    <p class="check-question__content">
-                        중간에 끼우기(insert)와 끝에 붙이기(append)의 차이는 무엇일까요?
-                    </p>
-                    <textarea 
-                        class="check-question__input" 
-                        rows="3" 
-                        placeholder="두 연산의 차이점을 설명해보세요..."
-                        aria-label="insert와 append 차이점 설명"
-                        id="final-input"
-                    ></textarea>
-                </div>
             </section>
         </main>
 
@@ -767,7 +712,6 @@
         const operationCards = document.querySelectorAll('.operation-card');
         const executeBtn = document.getElementById('execute-btn');
         const resetBtn = document.getElementById('reset-btn');
-        const finalInput = document.getElementById('final-input');
         const transitionMessage = document.getElementById('transition-message');
 
         // State
@@ -915,10 +859,9 @@
 
         // Check progress
         function checkProgress() {
-            const hasExecutedOperations = operationsExecuted.size >= 2;
-            const hasInput = finalInput.value.trim().length > 15;
+            const hasExecutedOperations = operationsExecuted.size >= 3;
             
-            if (hasExecutedOperations && hasInput) {
+            if (hasExecutedOperations) {
                 showTransitionMessage();
             }
         }
@@ -950,14 +893,8 @@
         executeBtn.addEventListener('click', executeOperation);
         resetBtn.addEventListener('click', resetToInitial);
 
-        finalInput.addEventListener('input', () => {
-            setTimeout(checkProgress, 500);
-        });
-
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target === finalInput) return;
-            
             switch(e.key) {
                 case '1':
                     e.preventDefault();

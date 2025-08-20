@@ -465,47 +465,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Check Question */
-        .check-question {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--primary);
-            text-align: center;
-            margin-top: 1rem;
-        }
-
-        .check-question__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-        }
-
-        .check-question__content {
-            font-size: 0.875rem;
-            color: var(--text);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .check-question__input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: inherit;
-            resize: none;
-            transition: border-color var(--transition);
-        }
-
-        .check-question__input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
 
         /* Transition Message */
         .transition-message {
@@ -765,20 +724,6 @@
                 </div>
             </section>
 
-            <section class="check-question">
-                <h3 class="check-question__title">🧠 생각해보기</h3>
-                <p class="check-question__content">
-                    0-based에서 마지막 요소의 인덱스는 '길이-1' 맞을까요?<br>
-                    <small>(우리 과일 리스트는 총 4개예요)</small>
-                </p>
-                <textarea 
-                    class="check-question__input" 
-                    rows="2" 
-                    placeholder="여러분의 생각을 적어보세요..."
-                    aria-label="길이-1 규칙에 대한 생각 입력"
-                    id="final-check"
-                ></textarea>
-            </section>
         </main>
 
         <div class="transition-message" id="transition-message">
@@ -797,7 +742,6 @@
         const quiz2 = document.getElementById('quiz2');
         const feedback1 = document.getElementById('feedback1');
         const feedback2 = document.getElementById('feedback2');
-        const finalCheck = document.getElementById('final-check');
         const transitionMessage = document.getElementById('transition-message');
 
         // Quiz answers
@@ -870,9 +814,8 @@
         // Check overall progress
         function checkProgress() {
             const hasQuizzes = completedQuizzes.size >= 2;
-            const hasInput = finalCheck.value.trim().length > 10;
             
-            if (hasQuizzes && hasInput) {
+            if (hasQuizzes) {
                 showTransitionMessage();
             }
         }
@@ -913,11 +856,6 @@
             inputTimer = setTimeout(() => checkAnswer(quiz2, feedback2, 'quiz2'), 300);
         });
 
-        // Final check monitoring
-        finalCheck.addEventListener('input', () => {
-            clearTimeout(inputTimer);
-            inputTimer = setTimeout(checkProgress, 500);
-        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {

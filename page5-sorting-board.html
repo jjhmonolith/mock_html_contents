@@ -510,48 +510,6 @@
             margin-top: 0.25rem;
         }
 
-        /* Check Question */
-        .check-question {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--primary);
-            flex-shrink: 0;
-        }
-
-        .check-question__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-align: center;
-        }
-
-        .check-question__content {
-            font-size: 0.875rem;
-            color: var(--text);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-            text-align: center;
-        }
-
-        .check-question__input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: inherit;
-            resize: none;
-            transition: border-color var(--transition);
-        }
-
-        .check-question__input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
 
         /* Transition Message */
         .transition-message {
@@ -697,19 +655,6 @@
                 </aside>
             </div>
 
-            <section class="check-question">
-                <h3 class="check-question__title">🤔 생각해보기</h3>
-                <p class="check-question__content">
-                    만약 두 장소(예: 도서관과 시장)를 바꾸면 어떤 문제가 생길까요?
-                </p>
-                <textarea 
-                    class="check-question__input" 
-                    rows="2" 
-                    placeholder="순서 변경의 문제점을 적어보세요..."
-                    aria-label="순서 변경 문제점 입력"
-                    id="final-input"
-                ></textarea>
-            </section>
         </main>
 
         <div class="transition-message" id="transition-message">
@@ -731,7 +676,6 @@
         const resetBtn = document.getElementById('reset-btn');
         const feedbackPanel = document.getElementById('feedback-panel');
         const feedbackText = document.getElementById('feedback-text');
-        const finalInput = document.getElementById('final-input');
         const transitionMessage = document.getElementById('transition-message');
 
         // State
@@ -898,7 +842,7 @@
 
         // Check overall progress
         function checkProgress() {
-            if (isComplete && finalInput.value.trim().length > 10) {
+            if (isComplete) {
                 showTransitionMessage();
             }
         }
@@ -916,14 +860,9 @@
         checkBtn.addEventListener('click', checkSorting);
         resetBtn.addEventListener('click', resetCards);
 
-        finalInput.addEventListener('input', () => {
-            setTimeout(checkProgress, 500);
-        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target === finalInput) return;
-            
             switch(e.key) {
                 case 's':
                 case 'S':

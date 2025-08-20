@@ -316,8 +316,8 @@
         .side-panel {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            justify-content: center;
+            align-items: stretch;
         }
 
         .teacher-guidance {
@@ -379,51 +379,6 @@
             line-height: 1.4;
         }
 
-        .check-question {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--purple);
-            flex: 1;
-        }
-
-        .check-question__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--purple);
-            margin-bottom: 0.75rem;
-            text-align: center;
-        }
-
-        .check-question__content {
-            font-size: 0.875rem;
-            color: var(--text);
-            margin-bottom: 0.75rem;
-            line-height: 1.5;
-        }
-
-        .check-question__input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: inherit;
-            resize: none;
-            transition: border-color var(--transition);
-        }
-
-        .check-question__input:focus {
-            outline: none;
-            border-color: var(--purple);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        }
-
-        .check-question__input--filled {
-            border-color: var(--success);
-            background: rgba(139, 92, 246, 0.05);
-        }
 
         /* Bottom Summary */
         .bottom-summary {
@@ -519,12 +474,11 @@
             }
 
             .side-panel {
-                flex-direction: row;
-                gap: 0.75rem;
+                justify-content: center;
             }
 
-            .teacher-guidance, .check-question {
-                flex: 1;
+            .teacher-guidance {
+                max-width: 100%;
             }
         }
     </style>
@@ -594,7 +548,6 @@
                     <div class="progress-dots">
                         <div class="progress-dot" id="dot-learned"></div>
                         <div class="progress-dot" id="dot-application"></div>
-                        <div class="progress-dot" id="dot-difference"></div>
                     </div>
                 </section>
 
@@ -616,19 +569,6 @@
                         </div>
                     </div>
 
-                    <div class="check-question">
-                        <h3 class="check-question__title">🤔 마지막 체크</h3>
-                        <p class="check-question__content">
-                            <strong>정렬</strong>과 <strong>정의(룰)</strong>의 차이를 한 문장으로 설명해보세요.
-                        </p>
-                        <textarea 
-                            class="check-question__input" 
-                            rows="3"
-                            placeholder="정렬은 순서를 바꾸는 것이고, 정의는..."
-                            aria-label="정렬과 정의의 차이 설명"
-                            id="difference-explanation"
-                        ></textarea>
-                    </div>
                 </aside>
             </div>
 
@@ -657,12 +597,10 @@
         // DOM Elements
         const learnedContent = document.getElementById('learned-content');
         const lifeApplication = document.getElementById('life-application');
-        const differenceExplanation = document.getElementById('difference-explanation');
         const completionMessage = document.getElementById('completion-message');
         const progressDots = {
             learned: document.getElementById('dot-learned'),
-            application: document.getElementById('dot-application'),
-            difference: document.getElementById('dot-difference')
+            application: document.getElementById('dot-application')
         };
 
         // State
@@ -688,7 +626,7 @@
 
         // Check overall progress
         function checkOverallProgress() {
-            if (completedSections.size === 3) {
+            if (completedSections.size === 2) {
                 showCompletionMessage();
             }
         }
@@ -732,18 +670,11 @@
             }, 300);
         });
 
-        differenceExplanation.addEventListener('input', () => {
-            setTimeout(() => {
-                checkContent(differenceExplanation, 'difference', 15);
-            }, 300);
-        });
-
         // Auto-save to localStorage
         function saveProgress() {
             const data = {
                 learned: learnedContent.value,
                 application: lifeApplication.value,
-                difference: differenceExplanation.value,
                 timestamp: new Date().toISOString()
             };
             localStorage.setItem('exitTicketProgress', JSON.stringify(data));
@@ -757,12 +688,10 @@
                     const data = JSON.parse(saved);
                     learnedContent.value = data.learned || '';
                     lifeApplication.value = data.application || '';
-                    differenceExplanation.value = data.difference || '';
                     
                     // Trigger content checks
                     if (data.learned) checkContent(learnedContent, 'learned', 20);
                     if (data.application) checkContent(lifeApplication, 'application', 25);
-                    if (data.difference) checkContent(differenceExplanation, 'difference', 15);
                 } catch (e) {
                     console.log('Could not load saved progress');
                 }
@@ -773,7 +702,7 @@
         setInterval(saveProgress, 5000);
 
         // Save on input
-        [learnedContent, lifeApplication, differenceExplanation].forEach(input => {
+        [learnedContent, lifeApplication].forEach(input => {
             input.addEventListener('input', saveProgress);
         });
 
@@ -789,10 +718,6 @@
                 case '2':
                     e.preventDefault();
                     lifeApplication.focus();
-                    break;
-                case '3':
-                    e.preventDefault();
-                    differenceExplanation.focus();
                     break;
             }
         });

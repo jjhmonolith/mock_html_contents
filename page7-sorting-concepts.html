@@ -528,46 +528,6 @@
             margin-top: 0.25rem;
         }
 
-        .check-question {
-            flex: 1;
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--info);
-        }
-
-        .check-question__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--info);
-            margin-bottom: 0.75rem;
-            text-align: center;
-        }
-
-        .check-question__content {
-            font-size: 0.875rem;
-            color: var(--text);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .check-question__input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: inherit;
-            resize: none;
-            transition: border-color var(--transition);
-        }
-
-        .check-question__input:focus {
-            outline: none;
-            border-color: var(--info);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
 
         /* Transition Message */
         .transition-message {
@@ -785,19 +745,6 @@
                     </p>
                 </div>
 
-                <div class="check-question">
-                    <h3 class="check-question__title">🤔 생각해보기</h3>
-                    <p class="check-question__content">
-                        점심 배식은 어떤 기준으로 정렬하는 게 공정할까요?
-                    </p>
-                    <textarea 
-                        class="check-question__input" 
-                        rows="3" 
-                        placeholder="공정한 배식 순서 기준을 제안해보세요..."
-                        aria-label="공정한 배식 순서 기준 입력"
-                        id="final-input"
-                    ></textarea>
-                </div>
             </section>
         </main>
 
@@ -817,7 +764,6 @@
         const statusContent = document.getElementById('status-content');
         const sortBtn = document.getElementById('sort-btn');
         const resetBtn = document.getElementById('reset-btn');
-        const finalInput = document.getElementById('final-input');
         const transitionMessage = document.getElementById('transition-message');
 
         // State
@@ -960,9 +906,8 @@
         // Check progress
         function checkProgress() {
             const hasTriedSorting = sortedCriteria.size >= 2;
-            const hasInput = finalInput.value.trim().length > 15;
             
-            if (hasTriedSorting && hasInput) {
+            if (hasTriedSorting) {
                 showTransitionMessage();
             }
         }
@@ -1000,14 +945,8 @@
 
         resetBtn.addEventListener('click', resetToOriginal);
 
-        finalInput.addEventListener('input', () => {
-            setTimeout(checkProgress, 500);
-        });
-
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target === finalInput) return;
-            
             switch(e.key) {
                 case '1':
                     e.preventDefault();
