@@ -1,0 +1,1153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이론·동기유발 | (A)공간 문제점 찾기</title>
+    <meta name="description" content="쾌적성이 낮은 공간에서 문제 요소를 찾아보고, 개선 방법을 학습하는 인터랙티브 활동.">
+    <meta property="og:title" content="이론·동기유발 | (A)공간 문제점 찾기">
+    <meta property="og:description" content="쾌적성이 낮은 공간에서 문제 요소를 찾아보고, 개선 방법을 학습하는 인터랙티브 활동.">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 공간 문제점 찾기 교안
+         * 버전: 2.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - UDL 베이직 모드 (툴바/TTS 없음)
+         * - 핫스폿 9개 상대 좌표 배치
+         * - 단일 스크린 완성형 교안
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F7FAFC;
+            --text: #111827;
+            --muted: #6B7280;
+            --primary: #2563EB;
+            --accent: #10B981;
+            --border: #E5E7EB;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: 180ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        /* Header */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            flex-shrink: 0;
+        }
+
+        .header__content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .header__title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .header__page {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 1rem;
+        }
+
+        .question {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .question__title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .question__desc {
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0;
+            flex-shrink: 0;
+        }
+
+        .tabs__btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all var(--transition);
+            min-height: 44px;
+            margin-bottom: -2px;
+        }
+
+        .tabs__btn:hover {
+            background: var(--surface);
+        }
+
+        .tabs__btn[aria-selected="true"] {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tabs__btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Panels */
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel[hidden] {
+            display: none;
+        }
+
+        /* Scene and Image */
+        .scene {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        .scene__img {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1rem;
+            position: relative;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .hotspot__area {
+            position: absolute;
+            cursor: pointer;
+            background: rgba(37, 99, 235, 0.1);
+            border: 2px dashed transparent;
+            transition: all var(--transition);
+            pointer-events: auto;
+            min-width: 20px;
+            min-height: 20px;
+        }
+
+        .hotspot__area:hover {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: var(--primary);
+        }
+
+        .hotspot__area:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+            border-color: var(--primary);
+        }
+
+        .hotspot__area--found {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: var(--accent);
+            cursor: default;
+        }
+
+        .hotspot__area--hint-1 {
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        .hotspot__area--hint-2 {
+            border-color: rgba(37, 99, 235, 0.6);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .hotspot__area--hint-3 {
+            border: 2px solid var(--primary);
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 35%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform var(--transition);
+        }
+
+        .side-panel.is-open {
+            transform: translateX(0);
+        }
+
+        /* HUD */
+        .hud {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: var(--surface);
+            border-radius: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .progress {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .progress__bar {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress__bar::-webkit-progress-bar {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .progress__bar::-webkit-progress-value {
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width var(--transition);
+        }
+
+        .progress__bar::-moz-progress-bar {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .counter {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all var(--transition);
+            min-height: 44px;
+        }
+
+        .btn:hover {
+            background: var(--surface);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .btn--primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn--primary:hover {
+            background: #1D4ED8;
+        }
+
+        /* List View */
+        .list-view {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .list-view__title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .list-view__filters {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .filter-chip {
+            padding: 0.25rem 0.5rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all var(--transition);
+        }
+
+        .filter-chip:hover {
+            background: var(--surface);
+        }
+
+        .filter-chip--active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist__item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background var(--transition);
+            margin-bottom: 0.25rem;
+        }
+
+        .checklist__item:hover {
+            background: var(--bg);
+        }
+
+        .checklist__checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .checklist__label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .checklist__category {
+            font-size: 0.625rem;
+            color: var(--muted);
+            padding: 0.125rem 0.375rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+            white-space: nowrap;
+        }
+
+        /* Feedback */
+        .feedback {
+            background: var(--surface);
+            border-left: 4px solid var(--accent);
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .feedback--error {
+            border-left-color: #EF4444;
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        /* B Panel Content */
+        .good-space {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-shrink: 0;
+        }
+
+        .chip {
+            padding: 0.375rem 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Reflection */
+        .reflection {
+            background: var(--surface);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            flex-shrink: 0;
+        }
+
+        .reflection__title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+
+        .reflection__input {
+            width: 100%;
+            min-height: 60px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-family: inherit;
+            font-size: 0.875rem;
+            resize: vertical;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .reflection__input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .reflection__actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            padding: 0.375rem 0.75rem;
+            background: #D1FAE5;
+            color: #065F46;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        /* Utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        /* Responsive adjustments within stage */
+        @media (max-width: 768px) {
+            .hud {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+
+            .progress {
+                width: 100%;
+            }
+
+            .side-panel {
+                width: 50%;
+            }
+
+            .question__title {
+                font-size: 1.25rem;
+            }
+
+            .header__title {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .side-panel {
+                width: 100%;
+            }
+
+            main {
+                padding: 0.75rem;
+            }
+
+            .question__title {
+                font-size: 1.125rem;
+            }
+
+            .question__desc {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <header>
+            <div class="header__content">
+                <h1 class="header__title">이론·동기유발 — (A)공간의 문제점 찾기</h1>
+                <span class="header__page">페이지 1</span>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="question" aria-labelledby="q-title">
+                <h2 id="q-title" class="question__title">(A)공간의 문제점을 모두 찾아봅시다.</h2>
+                <p id="q-desc" class="question__desc">
+                    (A)공간에서 쾌적성을 낮추는 요소를 모두 찾아 클릭하세요. 각 요소를 선택하면 원인과 개선 방법이 나타납니다.
+                </p>
+            </section>
+
+            <nav class="tabs" role="tablist" aria-label="보기 전환">
+                <button class="tabs__btn" role="tab" aria-selected="true" id="tab-a" aria-controls="panel-a">
+                    A 문제 공간
+                </button>
+                <button class="tabs__btn" role="tab" aria-selected="false" id="tab-b" aria-controls="panel-b">
+                    B 좋은 공간
+                </button>
+            </nav>
+
+            <section id="panel-a" class="panel" role="tabpanel" aria-labelledby="tab-a">
+                <div class="scene">
+                    <figure class="scene__img" 
+                            role="img" 
+                            aria-label="쾌적성이 낮은 공부방 장면: 덥고 건조하며 어둡고, 층간·자동차 소음과 시계 소음, 환기 부족, 가구에서 나오는 유해 성분이 있는 모습">
+                        [A 문제 공간 이미지 영역]
+                        <div class="overlay" id="overlay-a" aria-hidden="true"></div>
+                    </figure>
+
+                    <div class="side-panel" id="side-panel">
+                        <div class="list-view">
+                            <h3 class="list-view__title">문제 요소 체크리스트</h3>
+                            <div class="list-view__filters">
+                                <button class="filter-chip filter-chip--active" data-filter="all">전체</button>
+                                <button class="filter-chip" data-filter="온도/습도">온도·습도</button>
+                                <button class="filter-chip" data-filter="조도">조도</button>
+                                <button class="filter-chip" data-filter="소음">소음</button>
+                                <button class="filter-chip" data-filter="공기질">공기질</button>
+                                <button class="filter-chip" data-filter="정돈">정돈</button>
+                            </div>
+                            <ul class="checklist" id="checklist"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hud">
+                    <div class="progress">
+                        <progress id="prog" class="progress__bar" max="9" value="0" aria-label="진행도"></progress>
+                        <span id="counter" class="counter" aria-live="polite">0/9 발견</span>
+                    </div>
+                    <button class="btn" id="btn-hint">힌트</button>
+                    <button class="btn" id="btn-toggle-list" aria-expanded="false" aria-controls="side-panel">
+                        목록 보기
+                    </button>
+                </div>
+
+                <div id="feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true">
+                    시작하려면 이미지를 클릭하거나 목록 보기를 사용하세요.
+                </div>
+            </section>
+
+            <section id="panel-b" class="panel good-space" role="tabpanel" aria-labelledby="tab-b" hidden>
+                <figure class="scene">
+                    <div class="scene__img" 
+                         role="img"
+                         aria-label="쾌적성이 높은 공부방 장면: 적정 온도·습도, 밝고 균일한 조명, 조용함, 환기와 공기정화 식물, 정돈된 책상">
+                        [B 좋은 공간 이미지 영역]
+                    </div>
+                    <figcaption class="sr-only">온도·습도·조명·소음·공기질·정돈이 적절한 사례</figcaption>
+                </figure>
+                <div class="chips" aria-label="좋은 요소">
+                    <span class="chip">적정 온도·습도</span>
+                    <span class="chip">균일한 조명</span>
+                    <span class="chip">조용한 환경</span>
+                    <span class="chip">깨끗한 공기/환기</span>
+                    <span class="chip">자연요소·식물</span>
+                    <span class="chip">정돈/동선 확보</span>
+                </div>
+            </section>
+
+            <section class="reflection" aria-labelledby="reflect-title">
+                <h3 id="reflect-title" class="reflection__title">정리 · 내 공간 점검</h3>
+                <label for="answer" class="sr-only">개선할 점 한 가지</label>
+                <textarea 
+                    id="answer" 
+                    class="reflection__input"
+                    rows="2" 
+                    placeholder="우리 교실/공간에서 개선할 점 한 가지를 적어보세요."
+                    aria-describedby="answer-help"
+                ></textarea>
+                <span id="answer-help" class="sr-only">학습한 내용을 바탕으로 실제 공간의 개선점을 작성해주세요.</span>
+                <div class="reflection__actions">
+                    <button class="btn btn--primary" id="btn-save">저장</button>
+                    <button class="btn" id="btn-load">불러오기</button>
+                    <button class="btn" id="btn-reset">초기화</button>
+                    <span id="status" class="status" role="status" aria-live="polite" hidden></span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // Constants
+        const HOTSPOTS_A = [
+            {
+                id: "temp_hot_dry",
+                label: "덥고 건조함(온도·습도 불량)",
+                category: "온도/습도",
+                rect: { x: 47, y: 6, w: 14, h: 12 },
+                tip: "실내 온도 18–22℃, 상대습도 40–60%를 권장합니다. 환기/가습/차광을 조절하세요."
+            },
+            {
+                id: "glare_sun",
+                label: "창문 눈부심/직사광선",
+                category: "조도",
+                rect: { x: 16, y: 30, w: 22, h: 40 },
+                tip: "커튼·블라인드로 눈부심을 줄이고, 광원을 확산형으로 바꾸면 좋아요."
+            },
+            {
+                id: "too_dark",
+                label: "책상부 조명 부족(어두움)",
+                category: "조도",
+                rect: { x: 60, y: 58, w: 18, h: 20 },
+                tip: "책상등으로 500 lx 내외의 균일한 조도를 확보하세요."
+            },
+            {
+                id: "noise_upstairs",
+                label: "층간 소음",
+                category: "소음",
+                rect: { x: 58, y: 3, w: 24, h: 10 },
+                tip: "러그/흡음재, 학습 시간대 협의 등으로 소음을 줄일 수 있어요."
+            },
+            {
+                id: "noise_street",
+                label: "차량 경적/도로 소음",
+                category: "소음",
+                rect: { x: 5, y: 45, w: 12, h: 25 },
+                tip: "창문 밀폐/이중창·방음커튼 활용, 창문 방향 바꾸기."
+            },
+            {
+                id: "clock_noise",
+                label: "시계 소음(틱틱)",
+                category: "소음",
+                rect: { x: 78, y: 22, w: 8, h: 12 },
+                tip: "무소음 시계 사용 또는 위치 이동."
+            },
+            {
+                id: "voc_furniture",
+                label: "가구에서 유해 성분(공기질)",
+                category: "공기질",
+                rect: { x: 70, y: 62, w: 20, h: 28 },
+                tip: "환기와 저VOC 제품 사용. 활성탄 필터/공기청정기 활용."
+            },
+            {
+                id: "dust_vent",
+                label: "환기 불량/먼지 축적",
+                category: "공기질",
+                rect: { x: 44, y: 18, w: 12, h: 10 },
+                tip: "창문 열어 환기, 필터 청소. 1~2시간마다 공기 순환."
+            },
+            {
+                id: "clutter",
+                label: "지저분한 책상/통로 방해",
+                category: "정돈",
+                rect: { x: 34, y: 64, w: 18, h: 24 },
+                tip: "자주 쓰는 것만 두고 케이블 정리. 5분 정돈 규칙."
+            }
+        ];
+
+        const STORAGE_KEY = "env-spotter-A";
+        const STORAGE_ANSWER = "env-answer";
+
+        // State
+        let state = {
+            found: new Set(),
+            hintStep: 0,
+            currentFilter: 'all',
+            currentTab: 'a',
+            sidePanel: false
+        };
+
+        // DOM Elements
+        const elements = {
+            overlay: document.getElementById('overlay-a'),
+            checklist: document.getElementById('checklist'),
+            sidePanel: document.getElementById('side-panel'),
+            toggleListBtn: document.getElementById('btn-toggle-list'),
+            counter: document.getElementById('counter'),
+            prog: document.getElementById('prog'),
+            feedback: document.getElementById('feedback'),
+            hintBtn: document.getElementById('btn-hint'),
+            answer: document.getElementById('answer'),
+            status: document.getElementById('status'),
+            btnSave: document.getElementById('btn-save'),
+            btnLoad: document.getElementById('btn-load'),
+            btnReset: document.getElementById('btn-reset'),
+            tabA: document.getElementById('tab-a'),
+            tabB: document.getElementById('tab-b'),
+            panelA: document.getElementById('panel-a'),
+            panelB: document.getElementById('panel-b'),
+            filterChips: null
+        };
+
+        // Utility Functions
+        function showStatus(message, duration = 3000) {
+            elements.status.textContent = message;
+            elements.status.hidden = false;
+            setTimeout(() => {
+                elements.status.hidden = true;
+            }, duration);
+        }
+
+        // Hotspot Functions
+        function placeHotspots() {
+            elements.overlay.innerHTML = '';
+
+            HOTSPOTS_A.forEach((hotspot, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'hotspot__area';
+                button.setAttribute('aria-label', hotspot.label);
+                button.dataset.id = hotspot.id;
+                button.style.left = hotspot.rect.x + '%';
+                button.style.top = hotspot.rect.y + '%';
+                button.style.width = hotspot.rect.w + '%';
+                button.style.height = hotspot.rect.h + '%';
+                
+                if (state.found.has(hotspot.id)) {
+                    button.classList.add('hotspot__area--found');
+                    button.setAttribute('aria-pressed', 'true');
+                }
+
+                button.addEventListener('click', () => selectHotspot(hotspot));
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectHotspot(hotspot);
+                    } else if (e.key === 'ArrowRight') {
+                        const next = elements.overlay.querySelectorAll('.hotspot__area')[index + 1];
+                        if (next) next.focus();
+                    } else if (e.key === 'ArrowLeft') {
+                        const prev = elements.overlay.querySelectorAll('.hotspot__area')[index - 1];
+                        if (prev) prev.focus();
+                    }
+                });
+
+                elements.overlay.appendChild(button);
+            });
+        }
+
+        function selectHotspot(hotspot) {
+            if (state.found.has(hotspot.id)) {
+                const msg = "이미 찾은 항목이에요.";
+                elements.feedback.textContent = msg;
+                return;
+            }
+
+            state.found.add(hotspot.id);
+            const msg = `좋아요! '${hotspot.label}'을(를) 찾았어요. ${hotspot.tip}`;
+            elements.feedback.textContent = msg;
+            elements.feedback.classList.remove('feedback--error');
+            
+            updateProgress();
+            syncCheckbox(hotspot.id, true);
+            saveProgress();
+
+            // Update hotspot visual
+            const button = elements.overlay.querySelector(`[data-id="${hotspot.id}"]`);
+            if (button) {
+                button.classList.add('hotspot__area--found');
+                button.setAttribute('aria-pressed', 'true');
+            }
+
+            if (state.found.size === HOTSPOTS_A.length) {
+                complete();
+            }
+        }
+
+        function updateProgress() {
+            const count = state.found.size;
+            elements.prog.value = count;
+            elements.counter.textContent = `${count}/${HOTSPOTS_A.length} 발견`;
+        }
+
+        function complete() {
+            const msg = "축하합니다! 모든 문제 요소를 찾았어요. B 좋은 공간과 비교해 보세요.";
+            elements.feedback.textContent = msg;
+        }
+
+        // Checklist Functions
+        function buildChecklist() {
+            elements.checklist.innerHTML = '';
+            
+            HOTSPOTS_A.forEach(hotspot => {
+                if (state.currentFilter !== 'all' && hotspot.category !== state.currentFilter) {
+                    return;
+                }
+
+                const li = document.createElement('li');
+                li.className = 'checklist__item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'checklist__checkbox';
+                checkbox.id = 'cb-' + hotspot.id;
+                checkbox.checked = state.found.has(hotspot.id);
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        state.found.add(hotspot.id);
+                        const msg = `'${hotspot.label}'을(를) 체크했어요. ${hotspot.tip}`;
+                        elements.feedback.textContent = msg;
+                    } else {
+                        state.found.delete(hotspot.id);
+                    }
+                    updateProgress();
+                    placeHotspots();
+                    saveProgress();
+                    
+                    if (state.found.size === HOTSPOTS_A.length) {
+                        complete();
+                    }
+                });
+
+                const label = document.createElement('label');
+                label.className = 'checklist__label';
+                label.htmlFor = checkbox.id;
+                label.textContent = hotspot.label;
+
+                const category = document.createElement('span');
+                category.className = 'checklist__category';
+                category.textContent = hotspot.category;
+
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                li.appendChild(category);
+                elements.checklist.appendChild(li);
+            });
+
+            // Update filter chips
+            elements.filterChips = document.querySelectorAll('.filter-chip');
+            elements.filterChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    elements.filterChips.forEach(c => c.classList.remove('filter-chip--active'));
+                    chip.classList.add('filter-chip--active');
+                    state.currentFilter = chip.dataset.filter;
+                    buildChecklist();
+                });
+            });
+        }
+
+        function syncCheckbox(id, checked) {
+            const checkbox = document.getElementById('cb-' + id);
+            if (checkbox) {
+                checkbox.checked = checked;
+            }
+        }
+
+        function toggleSidePanel() {
+            state.sidePanel = !state.sidePanel;
+            if (state.sidePanel) {
+                elements.sidePanel.classList.add('is-open');
+                elements.toggleListBtn.setAttribute('aria-expanded', 'true');
+            } else {
+                elements.sidePanel.classList.remove('is-open');
+                elements.toggleListBtn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        // Hint Function
+        function showHint() {
+            const remaining = HOTSPOTS_A.filter(h => !state.found.has(h.id));
+            if (remaining.length === 0) {
+                elements.feedback.textContent = "모든 항목을 찾았습니다!";
+                return;
+            }
+
+            state.hintStep = (state.hintStep % 3) + 1;
+            const target = remaining[Math.floor(Math.random() * remaining.length)];
+
+            // Clear previous hints
+            elements.overlay.querySelectorAll('.hotspot__area').forEach(btn => {
+                btn.classList.remove('hotspot__area--hint-1', 'hotspot__area--hint-2', 'hotspot__area--hint-3');
+            });
+
+            const button = elements.overlay.querySelector(`[data-id="${target.id}"]`);
+            
+            if (state.hintStep === 1) {
+                const msg = `힌트 1: ${target.category}와 관련된 문제를 찾아보세요.`;
+                elements.feedback.textContent = msg;
+                if (button) button.classList.add('hotspot__area--hint-1');
+            } else if (state.hintStep === 2) {
+                const msg = `힌트 2: 이 영역 근처를 살펴보세요.`;
+                elements.feedback.textContent = msg;
+                if (button) button.classList.add('hotspot__area--hint-2');
+            } else {
+                const msg = `힌트 3: 정확한 위치를 표시했어요.`;
+                elements.feedback.textContent = msg;
+                if (button) button.classList.add('hotspot__area--hint-3');
+            }
+        }
+
+        // Tab Functions
+        function switchTab(tabId) {
+            if (tabId === 'a') {
+                elements.tabA.setAttribute('aria-selected', 'true');
+                elements.tabB.setAttribute('aria-selected', 'false');
+                elements.panelA.removeAttribute('hidden');
+                elements.panelB.setAttribute('hidden', '');
+                state.currentTab = 'a';
+            } else {
+                elements.tabA.setAttribute('aria-selected', 'false');
+                elements.tabB.setAttribute('aria-selected', 'true');
+                elements.panelA.setAttribute('hidden', '');
+                elements.panelB.removeAttribute('hidden');
+                state.currentTab = 'b';
+            }
+        }
+
+        // Save/Load Functions
+        function saveProgress() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    found: Array.from(state.found),
+                    hintStep: state.hintStep
+                }));
+            } catch (e) {
+                console.error('Save failed:', e);
+            }
+        }
+
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.found = new Set(data.found || []);
+                    state.hintStep = data.hintStep || 0;
+                }
+            } catch (e) {
+                console.error('Load failed:', e);
+            }
+        }
+
+        function saveAnswer() {
+            try {
+                localStorage.setItem(STORAGE_ANSWER, elements.answer.value);
+                showStatus('저장되었습니다.');
+            } catch (e) {
+                showStatus('저장에 실패했습니다.');
+            }
+        }
+
+        function loadAnswer() {
+            try {
+                const saved = localStorage.getItem(STORAGE_ANSWER);
+                if (saved) {
+                    elements.answer.value = saved;
+                    showStatus('불러왔습니다.');
+                } else {
+                    showStatus('저장된 내용이 없습니다.');
+                }
+            } catch (e) {
+                showStatus('불러오기에 실패했습니다.');
+            }
+        }
+
+        function resetAnswer() {
+            elements.answer.value = '';
+            showStatus('초기화되었습니다.');
+        }
+
+        // Keyboard Shortcuts
+        function handleKeyboardShortcuts(e) {
+            // Ignore if typing in textarea
+            if (e.target.tagName === 'TEXTAREA') return;
+            
+            switch(e.key.toLowerCase()) {
+                case 'h':
+                    if (!e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        showHint();
+                    }
+                    break;
+                case 'l':
+                    if (!e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        toggleSidePanel();
+                    }
+                    break;
+            }
+        }
+
+        // Initialize
+        function init() {
+            // Load saved data
+            loadProgress();
+
+            // Setup hotspots and checklist
+            placeHotspots();
+            buildChecklist();
+            updateProgress();
+
+            // Event listeners
+            elements.hintBtn.addEventListener('click', showHint);
+            elements.toggleListBtn.addEventListener('click', toggleSidePanel);
+            elements.btnSave.addEventListener('click', saveAnswer);
+            elements.btnLoad.addEventListener('click', loadAnswer);
+            elements.btnReset.addEventListener('click', resetAnswer);
+
+            // Tab switching
+            elements.tabA.addEventListener('click', () => switchTab('a'));
+            elements.tabB.addEventListener('click', () => switchTab('b'));
+
+            // Keyboard navigation for tabs
+            [elements.tabA, elements.tabB].forEach(tab => {
+                tab.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight') {
+                        switchTab(tab === elements.tabA ? 'b' : 'a');
+                        (tab === elements.tabA ? elements.tabB : elements.tabA).focus();
+                    } else if (e.key === 'ArrowLeft') {
+                        switchTab(tab === elements.tabB ? 'a' : 'b');
+                        (tab === elements.tabB ? elements.tabA : elements.tabB).focus();
+                    }
+                });
+            });
+
+            // Global keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+        }
+
+        // Start the app
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
+</body>
+</html>

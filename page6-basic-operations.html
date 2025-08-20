@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6페이지 — 개념3: 기본 연산(읽기·추가·삭제)</title>
+    <meta name="description" content="리스트의 기본 연산(읽기, 추가, 삭제)이 순서에 미치는 영향을 예측하고 실험하는 학습 페이지">
+    <meta property="og:title" content="6페이지 — 개념3: 기본 연산(읽기·추가·삭제)">
+    <meta property="og:description" content="리스트의 기본 연산(읽기, 추가, 삭제)이 순서에 미치는 영향을 예측하고 실험하는 학습 페이지">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 기본 연산(읽기·추가·삭제)
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 연산 예측 및 실행 시뮬레이션
+         * - 시각적 애니메이션으로 순서 변화 표현
+         * - 1300px 기준 레이아웃 최적화
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #8B5CF6;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --info: #3B82F6;
+            --success: #059669;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-primary: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            --gradient-secondary: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --gradient-accent: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --gradient-danger: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            --gradient-info: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            --transition: 250ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><circle cx="20" cy="10" r="3" fill="white" opacity="0.2"/><rect x="35" y="7" width="6" height="6" fill="white" opacity="0.15"/><polygon points="55,5 65,5 60,15" fill="white" opacity="0.25"/><circle cx="80" cy="10" r="4" fill="white" opacity="0.1"/></svg>') repeat;
+            animation: operations-flow 15s linear infinite;
+        }
+
+        @keyframes operations-flow {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100px); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Concept Introduction */
+        .concept-intro {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .concept-intro__title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .concept-intro__description {
+            font-size: 0.875rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Main Demo Section */
+        .demo-section {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* List Display */
+        .list-display {
+            flex: 1;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--secondary);
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+        }
+
+        .list-display__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .bus-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 0.5rem;
+            border: 2px dashed var(--secondary);
+            min-height: 200px;
+            position: relative;
+        }
+
+        .bus-item {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .bus-item--highlight {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            transform: scale(1.02);
+        }
+
+        .bus-item--removing {
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+
+        .bus-item--adding {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .bus-item__index {
+            width: 1.5rem;
+            height: 1.5rem;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .bus-item__icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .bus-item__name {
+            font-weight: 600;
+            font-size: 1rem;
+            flex: 1;
+        }
+
+        .list-status {
+            margin-top: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            text-align: center;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Operations Panel */
+        .operations-panel {
+            flex: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .operation-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .operation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .operation-card--active {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+        }
+
+        .operation-card--read {
+            border-color: var(--info);
+        }
+
+        .operation-card--read.operation-card--active {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+        }
+
+        .operation-card--delete {
+            border-color: var(--danger);
+        }
+
+        .operation-card--delete.operation-card--active {
+            background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%);
+        }
+
+        .operation-card__type {
+            position: absolute;
+            top: -0.5rem;
+            left: 1rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+        }
+
+        .operation-card--read .operation-card__type {
+            background: var(--info);
+        }
+
+        .operation-card--delete .operation-card__type {
+            background: var(--danger);
+        }
+
+        .operation-card__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.375rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .operation-card__description {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            flex: 1;
+        }
+
+        .operation-card__prediction {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 0.375rem;
+            padding: 0.375rem;
+            font-size: 0.625rem;
+            color: var(--primary);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all var(--transition);
+            line-height: 1.3;
+        }
+
+        .operation-card--active .operation-card__prediction {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .operation-card--read .operation-card__prediction {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .operation-card--delete .operation-card__prediction {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Action Controls */
+        .action-controls {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            flex-shrink: 0;
+        }
+
+        .action-controls__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
+            font-size: 0.75rem;
+            text-align: center;
+            flex: 1;
+        }
+
+        .btn--primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn--primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn--secondary {
+            background: var(--gradient-secondary);
+            color: white;
+        }
+
+        .btn--secondary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: flex;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .teacher-message {
+            flex: 2;
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 2px solid var(--accent);
+            position: relative;
+        }
+
+        .teacher-message::before {
+            content: '👨‍🏫';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background: var(--accent);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .teacher-message__text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #92400E;
+            line-height: 1.6;
+            margin-top: 0.25rem;
+        }
+
+        .check-question {
+            flex: 1;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+        }
+
+        .check-question__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .check-question__content {
+            font-size: 0.875rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .check-question__input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color var(--transition);
+        }
+
+        .check-question__input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        /* Transition Message */
+        .transition-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-secondary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .transition-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .demo-section {
+                flex-direction: column;
+            }
+
+            .operations-panel {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+            }
+
+            .bottom-section {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <header>
+            <div class="header__pattern"></div>
+            <span class="page-indicator">6/10</span>
+            <div class="header__content">
+                <h1 class="header__title">기본 연산: 읽기·추가·삭제</h1>
+                <p class="header__subtitle">연산이 순서에 미치는 영향을 예측해보세요! ⚙️</p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="concept-intro">
+                <h2 class="concept-intro__title">
+                    <span>🔧</span>
+                    연산의 3가지 기본 동작
+                </h2>
+                <p class="concept-intro__description">
+                    <strong>읽기</strong>=확인, <strong>추가</strong>=붙이기/끼우기, <strong>삭제</strong>=빼기. 각 연산이 리스트 순서에 어떤 영향을 주는지 예측해보세요!
+                </p>
+            </section>
+
+            <section class="demo-section">
+                <div class="list-display">
+                    <h3 class="list-display__title">
+                        <span>🚌</span>
+                        현재 버스 리스트
+                    </h3>
+                    
+                    <div class="bus-list" id="bus-list">
+                        <div class="bus-item" data-bus="A">
+                            <div class="bus-item__index">1</div>
+                            <div class="bus-item__icon">🚌</div>
+                            <div class="bus-item__name">버스A</div>
+                        </div>
+                        <div class="bus-item" data-bus="B">
+                            <div class="bus-item__index">2</div>
+                            <div class="bus-item__icon">🚌</div>
+                            <div class="bus-item__name">버스B</div>
+                        </div>
+                        <div class="bus-item" data-bus="C">
+                            <div class="bus-item__index">3</div>
+                            <div class="bus-item__icon">🚌</div>
+                            <div class="bus-item__name">버스C</div>
+                        </div>
+                    </div>
+                    
+                    <div class="list-status" id="list-status">
+                        현재 3개의 버스가 있습니다. 연산을 선택해보세요!
+                    </div>
+                </div>
+
+                <div class="operations-panel">
+                    <div class="operation-card operation-card--read" data-operation="read" tabindex="0">
+                        <div class="operation-card__type">읽기</div>
+                        <h4 class="operation-card__title">
+                            <span>👀</span>
+                            2번째 버스 확인하기
+                        </h4>
+                        <p class="operation-card__description">
+                            리스트의 특정 위치에 있는 버스를 확인합니다. 순서는 변하지 않아요!
+                        </p>
+                        <div class="operation-card__prediction">
+                            예상 결과: 버스B를 확인, 리스트는 [A, B, C] 그대로
+                        </div>
+                    </div>
+
+                    <div class="operation-card" data-operation="append" tabindex="0">
+                        <div class="operation-card__type">추가</div>
+                        <h4 class="operation-card__title">
+                            <span>➕</span>
+                            끝에 버스D 추가하기
+                        </h4>
+                        <p class="operation-card__description">
+                            리스트 맨 끝에 새로운 버스를 추가합니다. 기존 순서는 유지돼요!
+                        </p>
+                        <div class="operation-card__prediction">
+                            예상 결과: [A, B, C, D] - 끝에 D가 추가됨
+                        </div>
+                    </div>
+
+                    <div class="operation-card operation-card--delete" data-operation="delete" tabindex="0">
+                        <div class="operation-card__type">삭제</div>
+                        <h4 class="operation-card__title">
+                            <span>🗑️</span>
+                            2번째 버스 삭제하기
+                        </h4>
+                        <p class="operation-card__description">
+                            리스트에서 특정 위치의 버스를 제거합니다. 뒤의 요소들이 앞으로 당겨져요!
+                        </p>
+                        <div class="operation-card__prediction">
+                            예상 결과: [A, C] - B가 삭제되고 C가 2번째로 이동
+                        </div>
+                    </div>
+
+                    <div class="operation-card" data-operation="insert" tabindex="0">
+                        <div class="operation-card__type">삽입</div>
+                        <h4 class="operation-card__title">
+                            <span>↩️</span>
+                            1번째 앞에 버스E 끼우기
+                        </h4>
+                        <p class="operation-card__description">
+                            리스트 중간에 새로운 버스를 삽입합니다. 기존 요소들이 뒤로 밀려나요!
+                        </p>
+                        <div class="operation-card__prediction">
+                            예상 결과: [E, A, B, C] - E가 첫 번째, 나머지는 한 칸씩 뒤로
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="action-controls">
+                <h3 class="action-controls__title">🎮 연산 실행</h3>
+                <div class="action-buttons">
+                    <button class="btn btn--primary" id="execute-btn" disabled>선택한 연산 실행하기</button>
+                    <button class="btn btn--secondary" id="reset-btn">초기 상태로 되돌리기</button>
+                </div>
+            </div>
+
+            <section class="bottom-section">
+                <div class="teacher-message">
+                    <p class="teacher-message__text">
+                        <strong>실행 전 예측부터!</strong> 각 연산을 클릭해서 예상 결과를 확인하고, 
+                        바뀐 순서를 말로 설명해보세요. 삭제할 때 빈칸이 남지 않고 요소가 앞당겨지는 것을 주목하세요! 📝
+                    </p>
+                </div>
+
+                <div class="check-question">
+                    <h3 class="check-question__title">🤔 생각해보기</h3>
+                    <p class="check-question__content">
+                        중간에 끼우기(insert)와 끝에 붙이기(append)의 차이는 무엇일까요?
+                    </p>
+                    <textarea 
+                        class="check-question__input" 
+                        rows="3" 
+                        placeholder="두 연산의 차이점을 설명해보세요..."
+                        aria-label="insert와 append 차이점 설명"
+                        id="final-input"
+                    ></textarea>
+                </div>
+            </section>
+        </main>
+
+        <div class="transition-message" id="transition-message">
+            🎉 훌륭해요! 순서를 바꾸는 또 다른 방법, <strong>정렬</strong>을 살펴봅시다!
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const busList = document.getElementById('bus-list');
+        const listStatus = document.getElementById('list-status');
+        const operationCards = document.querySelectorAll('.operation-card');
+        const executeBtn = document.getElementById('execute-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const finalInput = document.getElementById('final-input');
+        const transitionMessage = document.getElementById('transition-message');
+
+        // State
+        let currentBuses = ['A', 'B', 'C'];
+        let selectedOperation = null;
+        let operationsExecuted = new Set();
+        let initialState = true;
+
+        // Initialize
+        function init() {
+            updateListDisplay();
+            updateStatus('현재 3개의 버스가 있습니다. 연산을 선택해보세요!');
+        }
+
+        // Update list display
+        function updateListDisplay() {
+            busList.innerHTML = '';
+            
+            currentBuses.forEach((bus, index) => {
+                const busItem = document.createElement('div');
+                busItem.className = 'bus-item bus-item--adding';
+                busItem.dataset.bus = bus;
+                busItem.innerHTML = `
+                    <div class="bus-item__index">${index + 1}</div>
+                    <div class="bus-item__icon">🚌</div>
+                    <div class="bus-item__name">버스${bus}</div>
+                `;
+                busList.appendChild(busItem);
+            });
+        }
+
+        // Update status message
+        function updateStatus(message) {
+            listStatus.textContent = message;
+        }
+
+        // Select operation
+        function selectOperation(operation) {
+            // Remove previous selection
+            operationCards.forEach(card => card.classList.remove('operation-card--active'));
+            
+            // Set new selection
+            selectedOperation = operation;
+            const selectedCard = document.querySelector(`[data-operation="${operation}"]`);
+            selectedCard.classList.add('operation-card--active');
+            
+            executeBtn.disabled = false;
+            
+            // Update status with prediction
+            const predictions = {
+                read: '버스B를 확인합니다. 리스트는 변하지 않아요!',
+                append: '끝에 버스D를 추가할 예정입니다.',
+                delete: '2번째 버스B를 삭제할 예정입니다.',
+                insert: '1번째 앞에 버스E를 삽입할 예정입니다.'
+            };
+            
+            updateStatus(`선택됨: ${predictions[operation]}`);
+        }
+
+        // Execute selected operation
+        function executeOperation() {
+            if (!selectedOperation) return;
+
+            const busItems = busList.querySelectorAll('.bus-item');
+            
+            switch (selectedOperation) {
+                case 'read':
+                    executeRead();
+                    break;
+                case 'append':
+                    executeAppend();
+                    break;
+                case 'delete':
+                    executeDelete();
+                    break;
+                case 'insert':
+                    executeInsert();
+                    break;
+            }
+
+            operationsExecuted.add(selectedOperation);
+            initialState = false;
+            checkProgress();
+        }
+
+        // Execute read operation
+        function executeRead() {
+            const targetIndex = 1; // 2번째 (0-based index)
+            const busItems = busList.querySelectorAll('.bus-item');
+            
+            if (busItems[targetIndex]) {
+                busItems[targetIndex].classList.add('bus-item--highlight');
+                updateStatus(`✅ 2번째 버스${currentBuses[targetIndex]}를 확인했습니다! 리스트는 그대로 [${currentBuses.join(', ')}]`);
+                
+                setTimeout(() => {
+                    busItems[targetIndex].classList.remove('bus-item--highlight');
+                }, 2000);
+            }
+        }
+
+        // Execute append operation
+        function executeAppend() {
+            currentBuses.push('D');
+            updateListDisplay();
+            updateStatus(`✅ 버스D를 끝에 추가했습니다! 새 리스트: [${currentBuses.join(', ')}]`);
+        }
+
+        // Execute delete operation
+        function executeDelete() {
+            const targetIndex = 1; // 2번째 (0-based index)
+            const busItems = busList.querySelectorAll('.bus-item');
+            
+            if (busItems[targetIndex]) {
+                busItems[targetIndex].classList.add('bus-item--removing');
+                
+                setTimeout(() => {
+                    currentBuses.splice(targetIndex, 1);
+                    updateListDisplay();
+                    updateStatus(`✅ 2번째 버스를 삭제했습니다! 뒤의 요소들이 앞당겨짐: [${currentBuses.join(', ')}]`);
+                }, 300);
+            }
+        }
+
+        // Execute insert operation
+        function executeInsert() {
+            currentBuses.unshift('E'); // Insert at beginning
+            updateListDisplay();
+            updateStatus(`✅ 버스E를 맨 앞에 삽입했습니다! 기존 요소들이 뒤로: [${currentBuses.join(', ')}]`);
+        }
+
+        // Reset to initial state
+        function resetToInitial() {
+            currentBuses = ['A', 'B', 'C'];
+            selectedOperation = null;
+            operationsExecuted.clear();
+            initialState = true;
+            
+            // Clear selection
+            operationCards.forEach(card => card.classList.remove('operation-card--active'));
+            executeBtn.disabled = true;
+            
+            updateListDisplay();
+            updateStatus('현재 3개의 버스가 있습니다. 연산을 선택해보세요!');
+        }
+
+        // Check progress
+        function checkProgress() {
+            const hasExecutedOperations = operationsExecuted.size >= 2;
+            const hasInput = finalInput.value.trim().length > 15;
+            
+            if (hasExecutedOperations && hasInput) {
+                showTransitionMessage();
+            }
+        }
+
+        // Show transition message
+        function showTransitionMessage() {
+            transitionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                transitionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Event listeners
+        operationCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const operation = card.dataset.operation;
+                selectOperation(operation);
+            });
+            
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const operation = card.dataset.operation;
+                    selectOperation(operation);
+                }
+            });
+        });
+
+        executeBtn.addEventListener('click', executeOperation);
+        resetBtn.addEventListener('click', resetToInitial);
+
+        finalInput.addEventListener('input', () => {
+            setTimeout(checkProgress, 500);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target === finalInput) return;
+            
+            switch(e.key) {
+                case '1':
+                    e.preventDefault();
+                    selectOperation('read');
+                    break;
+                case '2':
+                    e.preventDefault();
+                    selectOperation('append');
+                    break;
+                case '3':
+                    e.preventDefault();
+                    selectOperation('delete');
+                    break;
+                case '4':
+                    e.preventDefault();
+                    selectOperation('insert');
+                    break;
+                case 'Enter':
+                    if (selectedOperation && !executeBtn.disabled) {
+                        e.preventDefault();
+                        executeOperation();
+                    }
+                    break;
+                case 'r':
+                case 'R':
+                    e.preventDefault();
+                    resetToInitial();
+                    break;
+            }
+        });
+
+        // Initialize
+        init();
+    })();
+    </script>
+</body>
+</html>

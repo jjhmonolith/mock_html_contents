@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4페이지 — 개념2: 인덱스와 위치</title>
+    <meta name="description" content="1-based와 0-based 인덱스 체계를 통해 순서 속 위치 표현을 학습하는 페이지">
+    <meta property="og:title" content="4페이지 — 개념2: 인덱스와 위치">
+    <meta property="og:description" content="1-based와 0-based 인덱스 체계를 통해 순서 속 위치 표현을 학습하는 페이지">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 인덱스와 위치
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 1-based/0-based 인덱스 비교 학습
+         * - 과일 리스트를 통한 직관적 위치 이해
+         * - 인터랙티브 질문-답변 활동
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #6366F1;
+            --secondary: #EC4899;
+            --accent: #10B981;
+            --warning: #F59E0B;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --success: #059669;
+            --error: #EF4444;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-secondary: linear-gradient(135deg, #EC4899 0%, #BE185D 100%);
+            --gradient-accent: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --transition: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><text x="10" y="25" font-size="16" fill="white" opacity="0.2">0</text><text x="25" y="15" font-size="14" fill="white" opacity="0.15">1</text></svg>') repeat;
+            animation: number-float 12s linear infinite;
+        }
+
+        @keyframes number-float {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-20px) translateY(-10px); }
+            100% { transform: translateX(-40px) translateY(0); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Concept Introduction */
+        .concept-intro {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .concept-intro__title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .concept-intro__description {
+            font-size: 0.875rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Main Demo Section */
+        .demo-section {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .index-system {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .index-system--1based {
+            border: 2px solid var(--secondary);
+        }
+
+        .index-system--0based {
+            border: 2px solid var(--accent);
+        }
+
+        .index-system__header {
+            text-align: center;
+            margin-bottom: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .index-system__title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text);
+        }
+
+        .index-system--1based .index-system__title {
+            color: var(--text);
+        }
+
+        .index-system--0based .index-system__title {
+            color: var(--text);
+        }
+
+        .index-system__subtitle {
+            font-size: 0.75rem;
+            color: var(--text);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.75rem;
+            display: inline-block;
+        }
+
+        .index-system--1based .index-system__subtitle {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--secondary);
+        }
+
+        .index-system--0based .index-system__subtitle {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+        }
+
+        .fruit-list {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+            overflow-x: auto;
+            align-items: stretch;
+        }
+
+        .fruit-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 0.75rem;
+            background: var(--surface);
+            border-radius: 0.5rem;
+            border: 2px solid transparent;
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+            flex: 1;
+            text-align: center;
+        }
+
+        .fruit-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .fruit-item--highlighted {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .index-system--1based .fruit-item--highlighted {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, #FCE7F3 0%, #F9A8D4 30%, #FCE7F3 100%);
+        }
+
+        .index-system--0based .fruit-item--highlighted {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #ECFDF5 0%, #6EE7B7 30%, #ECFDF5 100%);
+        }
+
+        .fruit-item__index {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+            flex-shrink: 0;
+            position: absolute;
+            top: -0.375rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .index-system--1based .fruit-item__index {
+            background: var(--secondary);
+        }
+
+        .index-system--0based .fruit-item__index {
+            background: var(--accent);
+        }
+
+        .fruit-item__icon {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .fruit-item__name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .fruit-item__position {
+            font-size: 0.625rem;
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            white-space: nowrap;
+        }
+
+        /* Activity Section */
+        .activity-section {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+            flex-shrink: 0;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--warning);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .quiz-card__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .quiz-question {
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px dashed var(--warning);
+        }
+
+        .quiz-question__text {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-question__input {
+            width: 100%;
+            padding: 0.375rem;
+            border: 2px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            transition: border-color var(--transition);
+        }
+
+        .quiz-question__input:focus {
+            outline: none;
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .quiz-question__input--correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .quiz-question__input--incorrect {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .quiz-feedback {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .quiz-feedback--correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            opacity: 1;
+        }
+
+        .quiz-feedback--incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            opacity: 1;
+        }
+
+        .teacher-note {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 2px solid var(--warning);
+            position: relative;
+        }
+
+        .teacher-note::before {
+            content: '👩‍🏫';
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            background: var(--warning);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .teacher-note__text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #92400E;
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+
+        /* Check Question */
+        .check-question {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .check-question__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .check-question__content {
+            font-size: 0.875rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .check-question__input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color var(--transition);
+        }
+
+        .check-question__input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Transition Message */
+        .transition-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-accent);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .transition-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .demo-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .activity-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .fruit-item {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .fruit-item__icon {
+                font-size: 2rem;
+            }
+
+            .index-system {
+                min-height: 320px;
+            }
+
+            .fruit-list {
+                gap: 0.5rem;
+            }
+
+            main {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .header__title {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .concept-intro__title {
+                font-size: 1.25rem;
+            }
+
+            .index-system__title {
+                font-size: 1rem;
+            }
+
+            .index-system__subtitle {
+                font-size: 0.75rem;
+                padding: 0.125rem 0.5rem;
+            }
+
+            .index-system {
+                padding: 1rem;
+                min-height: 280px;
+            }
+
+            .fruit-item {
+                padding: 0.75rem 0.5rem;
+                aspect-ratio: 0.9;
+            }
+
+            .fruit-item__name {
+                font-size: 0.75rem;
+            }
+
+            .fruit-item__icon {
+                font-size: 1.75rem;
+            }
+
+            .fruit-item__index {
+                width: 1.5rem;
+                height: 1.5rem;
+                font-size: 0.75rem;
+                top: 0.25rem;
+                left: 0.25rem;
+            }
+
+            .fruit-item__position {
+                font-size: 0.625rem;
+                padding: 0.125rem 0.375rem;
+                bottom: 0.25rem;
+            }
+        }
+
+        /* Fun decorations */
+        .number-decoration {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .number-decoration--1 {
+            top: 20%;
+            left: 10%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .number-decoration--2 {
+            top: 60%;
+            right: 15%;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <div class="number-decoration number-decoration--1">0</div>
+        <div class="number-decoration number-decoration--2">1</div>
+        
+        <header>
+            <div class="header__pattern"></div>
+            <span class="page-indicator">4/10</span>
+            <div class="header__content">
+                <h1 class="header__title">인덱스와 위치</h1>
+                <p class="header__subtitle">순서 속 위치를 표현하는 방법! 📍</p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="concept-intro">
+                <h2 class="concept-intro__title">
+                    <span>🔢</span>
+                    인덱스 = 순서 속 위치표
+                </h2>
+                <p class="concept-intro__description">
+                    같은 순서라도 '몇 번째'를 표현하는 방법이 두 가지가 있어요. 일상에서는 1번째부터, 컴퓨팅에서는 자주 0부터 세죠!
+                </p>
+            </section>
+
+            <section class="demo-section">
+                <div class="index-system index-system--1based">
+                    <header class="index-system__header">
+                        <h3 class="index-system__title">일상 표기 (1-based)</h3>
+                        <p class="index-system__subtitle">1번째, 2번째, 3번째...</p>
+                    </header>
+                    <div class="fruit-list" id="fruit-list-1based">
+                        <div class="fruit-item" data-fruit="apple" data-index="1">
+                            <div class="fruit-item__index">1</div>
+                            <div class="fruit-item__icon">🍎</div>
+                            <div class="fruit-item__name">사과</div>
+                            <div class="fruit-item__position">첫 번째</div>
+                        </div>
+                        <div class="fruit-item" data-fruit="banana" data-index="2">
+                            <div class="fruit-item__index">2</div>
+                            <div class="fruit-item__icon">🍌</div>
+                            <div class="fruit-item__name">바나나</div>
+                            <div class="fruit-item__position">두 번째</div>
+                        </div>
+                        <div class="fruit-item" data-fruit="cherry" data-index="3">
+                            <div class="fruit-item__index">3</div>
+                            <div class="fruit-item__icon">🍒</div>
+                            <div class="fruit-item__name">체리</div>
+                            <div class="fruit-item__position">세 번째</div>
+                        </div>
+                        <div class="fruit-item" data-fruit="jujube" data-index="4">
+                            <div class="fruit-item__index">4</div>
+                            <div class="fruit-item__icon">🥭</div>
+                            <div class="fruit-item__name">대추</div>
+                            <div class="fruit-item__position">네 번째</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="index-system index-system--0based">
+                    <header class="index-system__header">
+                        <h3 class="index-system__title">컴퓨팅 표기 (0-based)</h3>
+                        <p class="index-system__subtitle">인덱스 0, 1, 2, 3...</p>
+                    </header>
+                    <div class="fruit-list" id="fruit-list-0based">
+                        <div class="fruit-item" data-fruit="apple" data-index="0">
+                            <div class="fruit-item__index">0</div>
+                            <div class="fruit-item__icon">🍎</div>
+                            <div class="fruit-item__name">사과</div>
+                            <div class="fruit-item__position">인덱스 0</div>
+                        </div>
+                        <div class="fruit-item" data-fruit="banana" data-index="1">
+                            <div class="fruit-item__index">1</div>
+                            <div class="fruit-item__icon">🍌</div>
+                            <div class="fruit-item__name">바나나</div>
+                            <div class="fruit-item__position">인덱스 1</div>
+                        </div>
+                        <div class="fruit-item" data-fruit="cherry" data-index="2">
+                            <div class="fruit-item__index">2</div>
+                            <div class="fruit-item__icon">🍒</div>
+                            <div class="fruit-item__name">체리</div>
+                            <div class="fruit-item__position">인덱스 2</div>
+                        </div>
+                        <div class="fruit-item" data-fruit="jujube" data-index="3">
+                            <div class="fruit-item__index">3</div>
+                            <div class="fruit-item__icon">🥭</div>
+                            <div class="fruit-item__name">대추</div>
+                            <div class="fruit-item__position">인덱스 3</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="activity-section">
+                <div class="quiz-card">
+                    <h3 class="quiz-card__title">🤔 퀴즈 타임!</h3>
+                    
+                    <div class="quiz-question">
+                        <p class="quiz-question__text">두 번째(1-based)는 무엇인가요?</p>
+                        <input type="text" class="quiz-question__input" id="quiz1" placeholder="과일 이름을 입력하세요">
+                        <div class="quiz-feedback" id="feedback1"></div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p class="quiz-question__text">인덱스 2(0-based)는 무엇인가요?</p>
+                        <input type="text" class="quiz-question__input" id="quiz2" placeholder="과일 이름을 입력하세요">
+                        <div class="quiz-feedback" id="feedback2"></div>
+                    </div>
+                </div>
+
+                <div class="teacher-note">
+                    <p class="teacher-note__text">
+                        <strong>일상은 보통 1번째부터, 컴퓨팅은 자주 0부터 셉니다.</strong> 
+                        둘 다 맞는 표기 방식이에요! 0 시작을 "틀린 번호"로 생각하지 마세요. 
+                        표기 체계의 차이일 뿐입니다. 🎯
+                    </p>
+                </div>
+            </section>
+
+            <section class="check-question">
+                <h3 class="check-question__title">🧠 생각해보기</h3>
+                <p class="check-question__content">
+                    0-based에서 마지막 요소의 인덱스는 '길이-1' 맞을까요?<br>
+                    <small>(우리 과일 리스트는 총 4개예요)</small>
+                </p>
+                <textarea 
+                    class="check-question__input" 
+                    rows="2" 
+                    placeholder="여러분의 생각을 적어보세요..."
+                    aria-label="길이-1 규칙에 대한 생각 입력"
+                    id="final-check"
+                ></textarea>
+            </section>
+        </main>
+
+        <div class="transition-message" id="transition-message">
+            🎉 훌륭해요! 이제 위치를 알았으니, <strong>순서를 다루는 방법</strong>을 보죠!
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const fruitItems1based = document.querySelectorAll('#fruit-list-1based .fruit-item');
+        const fruitItems0based = document.querySelectorAll('#fruit-list-0based .fruit-item');
+        const quiz1 = document.getElementById('quiz1');
+        const quiz2 = document.getElementById('quiz2');
+        const feedback1 = document.getElementById('feedback1');
+        const feedback2 = document.getElementById('feedback2');
+        const finalCheck = document.getElementById('final-check');
+        const transitionMessage = document.getElementById('transition-message');
+
+        // Quiz answers
+        const answers = {
+            quiz1: ['바나나', 'banana'],
+            quiz2: ['체리', 'cherry']
+        };
+
+        // State
+        let completedQuizzes = new Set();
+        let inputTimer = null;
+
+        // Fruit item interaction
+        function highlightFruit(fruit, index, system) {
+            // Clear all highlights in both systems
+            [...fruitItems1based, ...fruitItems0based].forEach(item => {
+                item.classList.remove('fruit-item--highlighted');
+            });
+
+            // Highlight corresponding items in both systems
+            const items1based = document.querySelectorAll(`#fruit-list-1based .fruit-item[data-fruit="${fruit}"]`);
+            const items0based = document.querySelectorAll(`#fruit-list-0based .fruit-item[data-fruit="${fruit}"]`);
+            
+            items1based.forEach(item => item.classList.add('fruit-item--highlighted'));
+            items0based.forEach(item => item.classList.add('fruit-item--highlighted'));
+
+            // Auto-remove highlight after 3 seconds
+            setTimeout(() => {
+                [...fruitItems1based, ...fruitItems0based].forEach(item => {
+                    item.classList.remove('fruit-item--highlighted');
+                });
+            }, 3000);
+        }
+
+        // Quiz validation
+        function checkAnswer(inputElement, feedbackElement, quizId) {
+            const value = inputElement.value.trim().toLowerCase();
+            const correctAnswers = answers[quizId];
+            const isCorrect = correctAnswers.some(answer => 
+                value.includes(answer.toLowerCase()) || answer.toLowerCase().includes(value)
+            );
+
+            if (value.length === 0) {
+                inputElement.className = 'quiz-question__input';
+                feedbackElement.className = 'quiz-feedback';
+                feedbackElement.textContent = '';
+                completedQuizzes.delete(quizId);
+                return;
+            }
+
+            if (isCorrect) {
+                inputElement.className = 'quiz-question__input quiz-question__input--correct';
+                feedbackElement.className = 'quiz-feedback quiz-feedback--correct';
+                feedbackElement.textContent = '정답입니다! 🎉';
+                completedQuizzes.add(quizId);
+                
+                // Highlight the fruit
+                const fruit = correctAnswers[0] === '바나나' ? 'banana' : 'cherry';
+                highlightFruit(fruit);
+            } else {
+                inputElement.className = 'quiz-question__input quiz-question__input--incorrect';
+                feedbackElement.className = 'quiz-feedback quiz-feedback--incorrect';
+                feedbackElement.textContent = '다시 한 번 생각해보세요! 💭';
+                completedQuizzes.delete(quizId);
+            }
+
+            checkProgress();
+        }
+
+        // Check overall progress
+        function checkProgress() {
+            const hasQuizzes = completedQuizzes.size >= 2;
+            const hasInput = finalCheck.value.trim().length > 10;
+            
+            if (hasQuizzes && hasInput) {
+                showTransitionMessage();
+            }
+        }
+
+        // Show transition message
+        function showTransitionMessage() {
+            transitionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                transitionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Event listeners
+        [...fruitItems1based, ...fruitItems0based].forEach(item => {
+            item.addEventListener('click', () => {
+                const fruit = item.dataset.fruit;
+                const index = item.dataset.index;
+                const system = item.closest('.index-system--1based') ? '1based' : '0based';
+                highlightFruit(fruit, index, system);
+            });
+
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    item.click();
+                }
+            });
+        });
+
+        // Quiz input validation
+        quiz1.addEventListener('input', () => {
+            clearTimeout(inputTimer);
+            inputTimer = setTimeout(() => checkAnswer(quiz1, feedback1, 'quiz1'), 300);
+        });
+
+        quiz2.addEventListener('input', () => {
+            clearTimeout(inputTimer);
+            inputTimer = setTimeout(() => checkAnswer(quiz2, feedback2, 'quiz2'), 300);
+        });
+
+        // Final check monitoring
+        finalCheck.addEventListener('input', () => {
+            clearTimeout(inputTimer);
+            inputTimer = setTimeout(checkProgress, 500);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            const num = parseInt(e.key);
+            if (num >= 0 && num <= 3) {
+                e.preventDefault();
+                // Highlight fruit by 0-based index
+                const fruits = ['apple', 'banana', 'cherry', 'jujube'];
+                if (fruits[num]) {
+                    highlightFruit(fruits[num]);
+                }
+            }
+        });
+
+        // Navigation within fruit lists
+        [...fruitItems1based, ...fruitItems0based].forEach((item, index) => {
+            item.setAttribute('tabindex', '0');
+            item.addEventListener('keydown', (e) => {
+                const currentList = item.closest('.fruit-list');
+                const items = Array.from(currentList.querySelectorAll('.fruit-item'));
+                const currentIndex = items.indexOf(item);
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        // Move to item below (add 2 for 2-column grid)
+                        const nextItem = items[currentIndex + 2] || items[(currentIndex + 2) % items.length];
+                        nextItem.focus();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        // Move to item above (subtract 2 for 2-column grid)
+                        const prevItem = items[currentIndex - 2] || items[items.length + (currentIndex - 2)];
+                        prevItem.focus();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        // Check if moving within grid or to other system
+                        if (currentIndex % 2 === 0 && currentIndex + 1 < items.length) {
+                            // Move to right within same grid
+                            items[currentIndex + 1].focus();
+                        } else {
+                            // Switch to other system
+                            const otherSystem = currentList.closest('.index-system--1based') ? 
+                                document.querySelector('#fruit-list-0based') : 
+                                document.querySelector('#fruit-list-1based');
+                            const otherItems = otherSystem.querySelectorAll('.fruit-item');
+                            const targetItem = otherItems[Math.min(currentIndex, otherItems.length - 1)];
+                            targetItem.focus();
+                        }
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        // Check if moving within grid or to other system
+                        if (currentIndex % 2 === 1) {
+                            // Move to left within same grid
+                            items[currentIndex - 1].focus();
+                        } else {
+                            // Switch to other system
+                            const otherSystem2 = currentList.closest('.index-system--0based') ? 
+                                document.querySelector('#fruit-list-1based') : 
+                                document.querySelector('#fruit-list-0based');
+                            const otherItems2 = otherSystem2.querySelectorAll('.fruit-item');
+                            const targetItem2 = otherItems2[Math.min(currentIndex, otherItems2.length - 1)];
+                            targetItem2.focus();
+                        }
+                        break;
+                }
+            });
+        });
+
+        // Auto-focus hint
+        setTimeout(() => {
+            fruitItems1based[0].focus();
+        }, 2000);
+
+        // Educational demonstration
+        setTimeout(() => {
+            if (completedQuizzes.size === 0) {
+                // Show example by highlighting banana
+                highlightFruit('banana');
+                setTimeout(() => {
+                    quiz1.focus();
+                }, 3500);
+            }
+        }, 5000);
+    })();
+    </script>
+</body>
+</html>

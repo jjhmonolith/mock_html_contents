@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1페이지 — 훅: 세상은 순서로 움직여요</title>
+    <meta name="description" content="순서가 바뀌면 결과도 바뀐다! 중학생들의 일상 속에서 순서가 중요한 상황들을 탐구하는 훅 페이지">
+    <meta property="og:title" content="1페이지 — 훅: 세상은 순서로 움직여요">
+    <meta property="og:description" content="순서가 바뀌면 결과도 바뀐다! 중학생들의 일상 속에서 순서가 중요한 상황들을 탐구하는 훅 페이지">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 순차적 데이터 훅 페이지
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 중1 학생 대상 귀엽고 흥미로운 디자인
+         * - 훅 사진 3장과 상호작용 질문
+         * - 순서 중요성 체험 활동
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #6366F1;
+            --secondary: #EC4899;
+            --accent: #10B981;
+            --warning: #F59E0B;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-fun: linear-gradient(135deg, #FF6B9D 0%, #C44569 50%, #6C5CE7 100%);
+            --transition: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__deco {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><circle cx="10" cy="10" r="2" fill="white" opacity="0.3"/><circle cx="30" cy="5" r="1.5" fill="white" opacity="0.2"/><circle cx="50" cy="15" r="1" fill="white" opacity="0.4"/><circle cx="70" cy="8" r="2.5" fill="white" opacity="0.2"/><circle cx="90" cy="12" r="1.5" fill="white" opacity="0.3"/></svg>') repeat;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            overflow: hidden;
+        }
+
+        /* Hook Question */
+        .hook-question {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            border: 3px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hook-question::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background: var(--gradient-fun);
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .hook-question__title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .hook-question__emoji {
+            font-size: 2rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Scenarios Grid */
+        .scenarios {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            height: 100%;
+        }
+
+        .scenario {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scenario:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .scenario--active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #F0F4FF 0%, #E0E7FF 100%);
+        }
+
+        .scenario__image {
+            width: 100%;
+            height: 220px;
+            background: var(--gradient-bg);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scenario__image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 20px 20px;
+        }
+
+        .scenario__title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .scenario__question {
+            font-size: 0.875rem;
+            color: var(--secondary);
+            font-weight: 600;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.375rem;
+            background: rgba(236, 72, 153, 0.1);
+            border-radius: 0.5rem;
+            border: 1px dashed var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .scenario__answer {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--accent);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .scenario__answer.is-visible {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .teacher-message {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 2px solid var(--warning);
+            position: relative;
+        }
+
+        .teacher-message::before {
+            content: '👨‍🏫';
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            background: var(--warning);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .teacher-message__text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #92400E;
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+
+        .student-input {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent);
+        }
+
+        .student-input__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .student-input__field {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color var(--transition);
+        }
+
+        .student-input__field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .student-input__field::placeholder {
+            color: var(--text-light);
+        }
+
+        /* Transition Message */
+        .transition-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .transition-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .scenarios {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .scenario__image {
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .bottom-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .header__title {
+                font-size: 1.25rem;
+            }
+
+            main {
+                padding: 1rem;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hook-question__title {
+                font-size: 1.25rem;
+            }
+
+            .scenario__title {
+                font-size: 1rem;
+            }
+
+            .scenario__question {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Fun decorations */
+        .decoration {
+            position: absolute;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .decoration--1 {
+            top: 20%;
+            left: 5%;
+            width: 30px;
+            height: 30px;
+            background: var(--secondary);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .decoration--2 {
+            top: 60%;
+            right: 8%;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            transform: rotate(45deg);
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        .decoration--3 {
+            bottom: 30%;
+            left: 10%;
+            width: 25px;
+            height: 25px;
+            background: var(--warning);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            opacity: 0.1;
+            animation: float 7s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <div class="decoration decoration--1"></div>
+        <div class="decoration decoration--2"></div>
+        <div class="decoration decoration--3"></div>
+        
+        <header>
+            <div class="header__deco"></div>
+            <span class="page-indicator">1/10</span>
+            <div class="header__content">
+                <h1 class="header__title">세상은 순서로 움직여요</h1>
+                <p class="header__subtitle">순서가 바뀌면 결과도 바뀐다! 🎯</p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="hook-question">
+                <h2 class="hook-question__title">
+                    <span class="hook-question__emoji">🤔</span>
+                    이 세 장면의 공통점은 무엇일까요?
+                </h2>
+            </section>
+
+            <section class="scenarios">
+                <article class="scenario" data-scenario="lunch" tabindex="0" role="button" aria-pressed="false">
+                    <div class="scenario__image" role="img" aria-label="급식실에서 줄 서는 모습">
+                        <img src="1페이지 급식.png" alt="급식실에서 줄 서는 모습" width="100%" height="100%" style="object-fit: cover; border-radius: 0.75rem;">
+                    </div>
+                    <h3 class="scenario__title">급식 줄서기</h3>
+                    <p class="scenario__question">왜 새치기가 문제일까요?</p>
+                    <div class="scenario__answer">
+                        <strong>순서가 공정함을 만들어요!</strong><br>
+                        먼저 온 사람이 먼저 받는 것이 규칙이죠. 순서를 지켜야 모두가 기분 좋게 급식을 받을 수 있어요. 😊
+                    </div>
+                </article>
+
+                <article class="scenario" data-scenario="bus" tabindex="0" role="button" aria-pressed="false">
+                    <div class="scenario__image" role="img" aria-label="버스 정류장 표지판">
+                        <img src="1페이지 버스.png" alt="버스 정류장 표지판" width="100%" height="100%" style="object-fit: cover; border-radius: 0.75rem;">
+                    </div>
+                    <h3 class="scenario__title">버스 정류장</h3>
+                    <p class="scenario__question">정류장을 거꾸로 돌면?</p>
+                    <div class="scenario__answer">
+                        <strong>목적지에 도착할 수 없어요!</strong><br>
+                        버스 노선에는 정해진 순서가 있어요. 거꾸로 가면 집이나 학교 대신 엉뚱한 곳에 가게 돼요. 😅
+                    </div>
+                </article>
+
+                <article class="scenario" data-scenario="playlist" tabindex="0" role="button" aria-pressed="false">
+                    <div class="scenario__image" role="img" aria-label="음악 플레이리스트 화면">
+                        <img src="1페이지 플레이리스트.png" alt="음악 플레이리스트 화면" width="100%" height="100%" style="object-fit: cover; border-radius: 0.75rem;">
+                    </div>
+                    <h3 class="scenario__title">음악 플레이리스트</h3>
+                    <p class="scenario__question">플레이리스트를 섞으면?</p>
+                    <div class="scenario__answer">
+                        <strong>분위기가 완전히 바뀌어요!</strong><br>
+                        차분한 곡 다음에 갑자기 댄스 음악이 나오면 깜짝 놀라겠죠? 순서가 음악의 흐름과 감정을 만들어요. 🎶
+                    </div>
+                </article>
+            </section>
+
+            <section class="bottom-section">
+                <div class="teacher-message">
+                    <p class="teacher-message__text">
+                        맞아요! 바로 <strong>순서</strong>예요. 순서가 바뀌면 결과도 바뀝니다. 
+                        여러분 생활 속에서도 순서가 중요한 것들이 정말 많아요!
+                    </p>
+                </div>
+
+                <div class="student-input">
+                    <h3 class="student-input__title">💭 생각해보기</h3>
+                    <textarea 
+                        class="student-input__field" 
+                        rows="3" 
+                        placeholder="여러분 일상에서 '순서가 바뀌면 곤란'한 것 한 가지를 적어보세요!&#10;예) 옷 입는 순서, 양치하는 순서..."
+                        aria-label="순서가 중요한 일상 사례 입력"
+                    ></textarea>
+                </div>
+            </section>
+        </main>
+
+        <div class="transition-message" id="transition-message">
+            🎉 훌륭해요! 그 '순서가 중요한 데이터'를 우리는 <strong>순차적 데이터</strong>라고 부릅니다!
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const scenarios = document.querySelectorAll('.scenario');
+        const studentInput = document.querySelector('.student-input__field');
+        const transitionMessage = document.getElementById('transition-message');
+
+        // State
+        let selectedScenarios = new Set();
+        let inputTimer = null;
+
+        // Scenario interaction
+        function toggleScenario(scenario) {
+            const scenarioId = scenario.dataset.scenario;
+            const answer = scenario.querySelector('.scenario__answer');
+            const isSelected = selectedScenarios.has(scenarioId);
+            
+            if (isSelected) {
+                selectedScenarios.delete(scenarioId);
+                scenario.classList.remove('scenario--active');
+                scenario.setAttribute('aria-pressed', 'false');
+                answer.classList.remove('is-visible');
+            } else {
+                selectedScenarios.add(scenarioId);
+                scenario.classList.add('scenario--active');
+                scenario.setAttribute('aria-pressed', 'true');
+                answer.classList.add('is-visible');
+            }
+            
+            checkProgress();
+        }
+
+        // Check if ready to show transition
+        function checkProgress() {
+            const hasInput = studentInput.value.trim().length > 5;
+            const hasScenario = selectedScenarios.size > 0;
+            
+            if (hasInput && hasScenario) {
+                showTransitionMessage();
+            }
+        }
+
+        // Show transition message
+        function showTransitionMessage() {
+            transitionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                transitionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Event listeners
+        scenarios.forEach(scenario => {
+            scenario.addEventListener('click', () => toggleScenario(scenario));
+            scenario.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleScenario(scenario);
+                }
+            });
+        });
+
+        // Input monitoring with debounce
+        studentInput.addEventListener('input', () => {
+            clearTimeout(inputTimer);
+            inputTimer = setTimeout(checkProgress, 500);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target === studentInput) return;
+            
+            switch(e.key) {
+                case '1':
+                    e.preventDefault();
+                    toggleScenario(scenarios[0]);
+                    break;
+                case '2':
+                    e.preventDefault();
+                    toggleScenario(scenarios[1]);
+                    break;
+                case '3':
+                    e.preventDefault();
+                    toggleScenario(scenarios[2]);
+                    break;
+            }
+        });
+
+        // Focus management
+        scenarios.forEach((scenario, index) => {
+            scenario.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        const next = scenarios[index + 1] || scenarios[0];
+                        next.focus();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        const prev = scenarios[index - 1] || scenarios[scenarios.length - 1];
+                        prev.focus();
+                        break;
+                }
+            });
+        });
+
+        // Auto-start hint
+        setTimeout(() => {
+            if (selectedScenarios.size === 0) {
+                scenarios[0].focus();
+            }
+        }, 2000);
+    })();
+    </script>
+</body>
+</html>

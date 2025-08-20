@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2페이지 — 학습 목표 & 수업 지도</title>
+    <meta name="description" content="순차적 데이터 학습의 목표와 여정을 안내하는 수업 지도 페이지. 정의-인덱스-연산-정렬-표현까지의 학습 여정 소개">
+    <meta property="og:title" content="2페이지 — 학습 목표 & 수업 지도">
+    <meta property="og:description" content="순차적 데이터 학습의 목표와 여정을 안내하는 수업 지도 페이지">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 학습 목표 & 수업 지도
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 중1 학생 대상 친근한 학습 목표 제시
+         * - 여정 타임라인과 상호작용 요소
+         * - 핵심 용어 체크 기능
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #3B82F6;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --purple: #8B5CF6;
+            --pink: #EC4899;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --success: #059669;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+            --gradient-secondary: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --gradient-accent: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --transition: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><path d="M30 10 L40 25 L30 40 L20 25 Z" fill="white" opacity="0.1"/></svg>') repeat;
+            animation: slide 15s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(60px); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            overflow: hidden;
+        }
+
+        /* Learning Goals Section */
+        .goals-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 3px solid var(--primary);
+        }
+
+        .goals-section__title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .goal-card {
+            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 2px solid transparent;
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .goal-card--selected {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+        }
+
+        .goal-card__number {
+            position: absolute;
+            top: -0.5rem;
+            right: -0.5rem;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .goal-card__icon {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .goal-card__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .goal-card__description {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .goal-card__difficulty {
+            margin-top: 0.75rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .goal-card--selected .goal-card__difficulty {
+            opacity: 1;
+        }
+
+        /* Journey Timeline */
+        .journey-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .journey-section__title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .timeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 1;
+            position: relative;
+            margin: 0 1rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            border-radius: 1.5px;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .timeline-step {
+            background: white;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 3px solid var(--primary);
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .timeline-step:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .timeline-step--active {
+            background: var(--primary);
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: var(--shadow), 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: var(--shadow), 0 0 0 10px rgba(59, 130, 246, 0); }
+        }
+
+        .timeline-step__label {
+            position: absolute;
+            bottom: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        /* Teacher Message */
+        .teacher-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .teacher-message {
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 2px solid var(--secondary);
+            position: relative;
+        }
+
+        .teacher-message::before {
+            content: '👩‍🏫';
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            background: var(--secondary);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .teacher-message__text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--success);
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+
+        .key-terms {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--purple);
+        }
+
+        .key-terms__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--purple);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .terms-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .term-chip {
+            padding: 0.5rem;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--purple);
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--purple);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .term-chip:hover {
+            background: var(--purple);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .term-chip--selected {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* Student Activity Modal */
+        .activity-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition);
+        }
+
+        .activity-modal.is-visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .activity-modal__content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.9);
+            transition: transform var(--transition);
+        }
+
+        .activity-modal.is-visible .activity-modal__content {
+            transform: scale(1);
+        }
+
+        .activity-modal__title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .activity-modal__question {
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .activity-modal__input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            transition: border-color var(--transition);
+        }
+
+        .activity-modal__input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .activity-modal__buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .btn--primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn--primary:hover {
+            background: #1D4ED8;
+            transform: translateY(-1px);
+        }
+
+        .btn--secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn--secondary:hover {
+            background: var(--text-light);
+            color: white;
+        }
+
+        /* Transition Message */
+        .transition-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-secondary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .transition-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .goals-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .timeline {
+                flex-direction: column;
+                gap: 1rem;
+                margin: 1rem 0;
+            }
+
+            .timeline::before {
+                top: 0;
+                bottom: 0;
+                left: 50%;
+                width: 3px;
+                height: auto;
+                transform: translateX(-50%);
+            }
+
+            .timeline-step__label {
+                position: static;
+                transform: none;
+                margin-top: 0.5rem;
+            }
+
+            .teacher-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .terms-grid {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                padding: 1rem;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header__title {
+                font-size: 1.25rem;
+            }
+
+            .goals-section__title {
+                font-size: 1.25rem;
+            }
+
+            .goal-card__icon {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <header>
+            <div class="header__pattern"></div>
+            <span class="page-indicator">2/10</span>
+            <div class="header__content">
+                <h1 class="header__title">학습 목표 & 수업 지도</h1>
+                <p class="header__subtitle">
+                    <span>오늘의 학습 여정을 함께 떠나요!</span>
+                    <span>🗺️</span>
+                </p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="goals-section">
+                <h2 class="goals-section__title">
+                    <span>🎯</span>
+                    오늘 우리가 도달할 세 가지 목표
+                </h2>
+                <div class="goals-grid">
+                    <article class="goal-card" data-goal="explain" tabindex="0" role="button" aria-pressed="false">
+                        <div class="goal-card__number">1</div>
+                        <div class="goal-card__icon">💬</div>
+                        <h3 class="goal-card__title">학생 말로 설명하기</h3>
+                        <p class="goal-card__description">
+                            순차적 데이터가 뭔지 친구에게 쉽게 설명할 수 있어요
+                        </p>
+                        <div class="goal-card__difficulty">📊 난이도: 보통</div>
+                    </article>
+
+                    <article class="goal-card" data-goal="index" tabindex="0" role="button" aria-pressed="false">
+                        <div class="goal-card__number">2</div>
+                        <div class="goal-card__icon">👉</div>
+                        <h3 class="goal-card__title">인덱스로 가리키기</h3>
+                        <p class="goal-card__description">
+                            데이터 위치를 숫자로 정확하게 찾고 가리킬 수 있어요
+                        </p>
+                        <div class="goal-card__difficulty">📊 난이도: 쉬움</div>
+                    </article>
+
+                    <article class="goal-card" data-goal="operation" tabindex="0" role="button" aria-pressed="false">
+                        <div class="goal-card__number">3</div>
+                        <div class="goal-card__icon">🔧</div>
+                        <h3 class="goal-card__title">연산·정렬 결과 예측</h3>
+                        <p class="goal-card__description">
+                            데이터를 바꾸거나 정렬했을 때 결과를 미리 알 수 있어요
+                        </p>
+                        <div class="goal-card__difficulty">📊 난이도: 어려움</div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="journey-section">
+                <h2 class="journey-section__title">
+                    <span>🚶‍♀️</span>
+                    오늘의 학습 여정
+                </h2>
+                <div class="timeline">
+                    <div class="timeline-step timeline-step--active" data-step="concept" title="개념 이해">
+                        📚
+                        <div class="timeline-step__label">개념</div>
+                    </div>
+                    <div class="timeline-step" data-step="index" title="인덱스 학습">
+                        🔢
+                        <div class="timeline-step__label">인덱스</div>
+                    </div>
+                    <div class="timeline-step" data-step="operation" title="연산 학습">
+                        ⚙️
+                        <div class="timeline-step__label">연산</div>
+                    </div>
+                    <div class="timeline-step" data-step="sort" title="정렬 학습">
+                        📶
+                        <div class="timeline-step__label">정렬</div>
+                    </div>
+                    <div class="timeline-step" data-step="expression" title="표현 방법">
+                        🎨
+                        <div class="timeline-step__label">표현</div>
+                    </div>
+                    <div class="timeline-step" data-step="check" title="확인 퀴즈">
+                        ✅
+                        <div class="timeline-step__label">확인</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="teacher-section">
+                <div class="teacher-message">
+                    <p class="teacher-message__text">
+                        <strong>오늘은 정의–인덱스–연산–정렬–표현까지 가볍게 훑고</strong>, 중간에 보드·실습·퀴즈로 재미도 챙깁니다! 
+                        걱정 마세요, 차근차근 함께 가볼게요. 😊
+                    </p>
+                </div>
+
+                <div class="key-terms">
+                    <h3 class="key-terms__title">🔑 핵심 용어들</h3>
+                    <div class="terms-grid">
+                        <button class="term-chip" data-term="sequential">순차적</button>
+                        <button class="term-chip" data-term="index">인덱스</button>
+                        <button class="term-chip" data-term="operation">연산</button>
+                        <button class="term-chip" data-term="sorting">정렬</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="activity-modal" id="activity-modal">
+            <div class="activity-modal__content">
+                <h3 class="activity-modal__title">🤔 생각해보기</h3>
+                <p class="activity-modal__question">
+                    오늘 다루는 네 가지 핵심 용어 중 하나만 말해보세요!<br>
+                    <small>(순차적, 인덱스, 연산, 정렬)</small>
+                </p>
+                <input type="text" class="activity-modal__input" placeholder="핵심 용어를 입력하세요..." maxlength="10">
+                <div class="activity-modal__buttons">
+                    <button class="btn btn--primary" id="submit-term">제출</button>
+                    <button class="btn btn--secondary" id="close-modal">닫기</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="transition-message" id="transition-message">
+            🎉 훌륭해요! 그럼 <strong>순차적 데이터</strong>가 정확히 뭘까요?
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const goalCards = document.querySelectorAll('.goal-card');
+        const timelineSteps = document.querySelectorAll('.timeline-step');
+        const termChips = document.querySelectorAll('.term-chip');
+        const activityModal = document.getElementById('activity-modal');
+        const termInput = document.querySelector('.activity-modal__input');
+        const submitBtn = document.getElementById('submit-term');
+        const closeBtn = document.getElementById('close-modal');
+        const transitionMessage = document.getElementById('transition-message');
+
+        // State
+        let selectedGoals = new Set();
+        let selectedTerms = new Set();
+        let currentStep = 0;
+        let activityCompleted = false;
+
+        // Timeline animation
+        function animateTimeline() {
+            timelineSteps.forEach((step, index) => {
+                setTimeout(() => {
+                    if (index <= currentStep) {
+                        step.classList.add('timeline-step--active');
+                    } else {
+                        step.classList.remove('timeline-step--active');
+                    }
+                }, index * 200);
+            });
+        }
+
+        // Goal card interaction
+        function toggleGoal(card) {
+            const goalId = card.dataset.goal;
+            const isSelected = selectedGoals.has(goalId);
+            
+            if (isSelected) {
+                selectedGoals.delete(goalId);
+                card.classList.remove('goal-card--selected');
+                card.setAttribute('aria-pressed', 'false');
+            } else {
+                selectedGoals.add(goalId);
+                card.classList.add('goal-card--selected');
+                card.setAttribute('aria-pressed', 'true');
+            }
+            
+            checkProgress();
+        }
+
+        // Term chip interaction
+        function toggleTerm(chip) {
+            const termId = chip.dataset.term;
+            const isSelected = selectedTerms.has(termId);
+            
+            if (isSelected) {
+                selectedTerms.delete(termId);
+                chip.classList.remove('term-chip--selected');
+            } else {
+                selectedTerms.add(termId);
+                chip.classList.add('term-chip--selected');
+            }
+            
+            checkProgress();
+        }
+
+        // Check progress and show modal
+        function checkProgress() {
+            if (selectedGoals.size > 0 && selectedTerms.size > 0 && !activityCompleted) {
+                setTimeout(showActivityModal, 1000);
+            }
+        }
+
+        // Show activity modal
+        function showActivityModal() {
+            activityModal.classList.add('is-visible');
+            termInput.focus();
+        }
+
+        // Hide activity modal
+        function hideActivityModal() {
+            activityModal.classList.remove('is-visible');
+        }
+
+        // Submit term
+        function submitTerm() {
+            const value = termInput.value.trim().toLowerCase();
+            const validTerms = ['순차적', '인덱스', '연산', '정렬'];
+            
+            if (validTerms.some(term => value.includes(term))) {
+                activityCompleted = true;
+                hideActivityModal();
+                showTransitionMessage();
+                
+                // Animate timeline to completion
+                currentStep = timelineSteps.length - 1;
+                animateTimeline();
+            } else {
+                termInput.style.borderColor = '#EF4444';
+                setTimeout(() => {
+                    termInput.style.borderColor = '';
+                }, 1000);
+            }
+        }
+
+        // Show transition message
+        function showTransitionMessage() {
+            transitionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                transitionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Event listeners
+        goalCards.forEach(card => {
+            card.addEventListener('click', () => toggleGoal(card));
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleGoal(card);
+                }
+            });
+        });
+
+        timelineSteps.forEach((step, index) => {
+            step.addEventListener('click', () => {
+                currentStep = index;
+                animateTimeline();
+            });
+        });
+
+        termChips.forEach(chip => {
+            chip.addEventListener('click', () => toggleTerm(chip));
+        });
+
+        submitBtn.addEventListener('click', submitTerm);
+        closeBtn.addEventListener('click', hideActivityModal);
+
+        termInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitTerm();
+            }
+        });
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && activityModal.classList.contains('is-visible')) {
+                hideActivityModal();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (activityModal.classList.contains('is-visible')) return;
+            
+            switch(e.key) {
+                case '1':
+                    e.preventDefault();
+                    toggleGoal(goalCards[0]);
+                    break;
+                case '2':
+                    e.preventDefault();
+                    toggleGoal(goalCards[1]);
+                    break;
+                case '3':
+                    e.preventDefault();
+                    toggleGoal(goalCards[2]);
+                    break;
+            }
+        });
+
+        // Auto-start timeline animation
+        setTimeout(() => {
+            animateTimeline();
+        }, 1000);
+
+        // Auto-focus first goal after delay
+        setTimeout(() => {
+            if (selectedGoals.size === 0) {
+                goalCards[0].focus();
+            }
+        }, 3000);
+    })();
+    </script>
+</body>
+</html>

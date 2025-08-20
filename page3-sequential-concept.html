@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3페이지 — 개념1: 순차적 데이터란?</title>
+    <meta name="description" content="순서가 중요한 데이터와 덜 중요한 데이터를 구분하여 순차적 데이터의 개념을 이해하는 페이지">
+    <meta property="og:title" content="3페이지 — 개념1: 순차적 데이터란?">
+    <meta property="og:description" content="순서가 중요한 데이터와 덜 중요한 데이터를 구분하여 순차적 데이터의 개념을 이해하는 페이지">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 순차적 데이터 개념
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 순서 중요/덜 중요 대비 학습
+         * - 일상 사례를 통한 개념 이해
+         * - 이유 붙이기 상호작용 활동
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #3B82F6;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --purple: #8B5CF6;
+            --pink: #EC4899;
+            --red: #EF4444;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --success: #059669;
+            --warning: #D97706;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-important: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+            --gradient-less: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --transition: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-important);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__deco {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path d="M10 5 L20 15 L30 5 L40 15 L50 5" stroke="white" stroke-width="2" fill="none" opacity="0.2"/><path d="M60 15 L70 5 L80 15 L90 5" stroke="white" stroke-width="2" fill="none" opacity="0.3"/></svg>') repeat;
+            animation: wave 8s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-50px); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            overflow: hidden;
+        }
+
+        /* Concept Introduction */
+        .concept-intro {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 3px solid var(--purple);
+            text-align: center;
+        }
+
+        .concept-intro__title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .concept-intro__description {
+            font-size: 1rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Main Comparison */
+        .comparison-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .comparison-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .column-header {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .column-header--important {
+            background: var(--gradient-important);
+        }
+
+        .column-header--less {
+            background: var(--gradient-less);
+        }
+
+        .column-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="20" fill="white" opacity="0.1"/></svg>') repeat;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .column-header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Example Cards */
+        .example-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .example-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .example-card--important {
+            border-color: var(--primary);
+        }
+
+        .example-card--important:hover {
+            border-color: #1D4ED8;
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+        }
+
+        .example-card--less {
+            border-color: var(--secondary);
+        }
+
+        .example-card--less:hover {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        }
+
+        .example-card--active {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .example-card--important.example-card--active {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            border-color: #1D4ED8;
+        }
+
+        .example-card--less.example-card--active {
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+            border-color: var(--success);
+        }
+
+        .example-card__icon {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .example-card__title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .example-card__description {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .example-card__reason {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary);
+        }
+
+        .example-card--less .example-card__reason {
+            border-color: var(--secondary);
+        }
+
+        .example-card__reason.is-visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .example-card__reason-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: var(--text-light);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            transition: all var(--transition);
+        }
+
+        .example-card__reason-close:hover {
+            background: var(--text);
+            transform: scale(1.1);
+        }
+
+        .example-card__toggle {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            transition: all var(--transition);
+        }
+
+        .example-card--active .example-card__toggle {
+            background: var(--primary);
+            color: white;
+        }
+
+        .example-card--less.example-card--active .example-card__toggle {
+            background: var(--secondary);
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .teacher-message {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 2px solid var(--accent);
+            position: relative;
+        }
+
+        .teacher-message::before {
+            content: '👨‍🏫';
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            background: var(--accent);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .teacher-message__text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--warning);
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+
+        .check-question {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--pink);
+            text-align: center;
+        }
+
+        .check-question__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--pink);
+            margin-bottom: 0.75rem;
+        }
+
+        .check-question__content {
+            font-size: 0.875rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .check-question__input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color var(--transition);
+        }
+
+        .check-question__input:focus {
+            outline: none;
+            border-color: var(--pink);
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+
+        /* Transition Message */
+        .transition-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-important);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .transition-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .comparison-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .bottom-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .example-card__icon {
+                font-size: 2rem;
+            }
+
+            main {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .header__title {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .concept-intro__title {
+                font-size: 1.25rem;
+            }
+
+            .column-header {
+                font-size: 1rem;
+                padding: 0.75rem;
+            }
+
+            .example-card {
+                padding: 1rem;
+            }
+        }
+
+        /* Fun decorations */
+        .float-decoration {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .float-decoration--1 {
+            top: 20%;
+            left: 5%;
+            font-size: 2rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .float-decoration--2 {
+            top: 60%;
+            right: 8%;
+            font-size: 1.5rem;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <div class="float-decoration float-decoration--1">📋</div>
+        <div class="float-decoration float-decoration--2">🎲</div>
+        
+        <header>
+            <div class="header__deco"></div>
+            <span class="page-indicator">3/10</span>
+            <div class="header__content">
+                <h1 class="header__title">순차적 데이터란?</h1>
+                <p class="header__subtitle">순서가 의미를 만든다! 🎯</p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="concept-intro">
+                <h2 class="concept-intro__title">
+                    <span>🤔</span>
+                    같은 '모음'이라도 차이가 있어요
+                </h2>
+                <p class="concept-intro__description">
+                    어떤 것들은 나열 순서 자체가 중요한 의미를 가지고, 어떤 것들은 순서가 상대적으로 덜 중요해요.
+                </p>
+            </section>
+
+            <section class="comparison-section">
+                <div class="comparison-column">
+                    <header class="column-header column-header--important">
+                        <div class="column-header__content">
+                            <div>🔥 순서가 중요한 것들</div>
+                            <small>순서가 바뀌면 의미도 바뀌어요!</small>
+                        </div>
+                    </header>
+
+                    <article class="example-card example-card--important" data-example="recipe" tabindex="0" role="button" aria-pressed="false">
+                        <div class="example-card__toggle">+</div>
+                        <div class="example-card__icon">🍳</div>
+                        <h3 class="example-card__title">요리 레시피</h3>
+                        <p class="example-card__description">
+                            계란후라이 만들기: 팬 달구기 → 기름 두르기 → 계란 깨기
+                        </p>
+                        <div class="example-card__reason">
+                            <button class="example-card__reason-close" aria-label="닫기">×</button>
+                            <strong>왜 순서가 중요할까요?</strong><br>
+                            순서를 바꾸면 완전히 다른 결과가 나와요! 기름 없이 계란을 먼저 넣으면 팬에 달라붙고, 팬을 안 달구고 요리하면 제대로 익지 않아요. 😅
+                        </div>
+                    </article>
+
+                    <article class="example-card example-card--important" data-example="schedule" tabindex="0" role="button" aria-pressed="false">
+                        <div class="example-card__toggle">+</div>
+                        <div class="example-card__icon">📅</div>
+                        <h3 class="example-card__title">학교 시간표</h3>
+                        <p class="example-card__description">
+                            1교시 국어 → 2교시 수학 → 3교시 체육 → 4교시 과학
+                        </p>
+                        <div class="example-card__reason">
+                            <button class="example-card__reason-close" aria-label="닫기">×</button>
+                            <strong>왜 순서가 중요할까요?</strong><br>
+                            체육 다음에 수학이 있으면 땀 흘린 상태로 수학 공부를 해야 해요. 과목 순서에 따라 하루 컨디션이 달라지죠! 📚
+                        </div>
+                    </article>
+
+                    <article class="example-card example-card--important" data-example="bus-stops" tabindex="0" role="button" aria-pressed="false">
+                        <div class="example-card__toggle">+</div>
+                        <div class="example-card__icon">🚌</div>
+                        <h3 class="example-card__title">버스 정류장</h3>
+                        <p class="example-card__description">
+                            학교앞 → 시청 → 병원 → 마트 → 우리집
+                        </p>
+                        <div class="example-card__reason">
+                            <button class="example-card__reason-close" aria-label="닫기">×</button>
+                            <strong>왜 순서가 중요할까요?</strong><br>
+                            정류장 순서가 바뀌면 내릴 곳을 놓치거나 엉뚱한 곳에 가게 돼요. 버스 노선의 순서는 우리가 목적지에 도착하는 방법이에요! 🎯
+                        </div>
+                    </article>
+                </div>
+
+                <div class="comparison-column">
+                    <header class="column-header column-header--less">
+                        <div class="column-header__content">
+                            <div>💚 순서가 덜 중요한 것들</div>
+                            <small>순서가 바뀌어도 큰 문제없어요!</small>
+                        </div>
+                    </header>
+
+                    <article class="example-card example-card--less" data-example="pencil-case" tabindex="0" role="button" aria-pressed="false">
+                        <div class="example-card__toggle">+</div>
+                        <div class="example-card__icon">✏️</div>
+                        <h3 class="example-card__title">연필꽂이</h3>
+                        <p class="example-card__description">
+                            볼펜, 연필, 지우개, 자, 형광펜이 들어있어요
+                        </p>
+                        <div class="example-card__reason">
+                            <button class="example-card__reason-close" aria-label="닫기">×</button>
+                            <strong>왜 순서가 덜 중요할까요?</strong><br>
+                            어떤 순서로 넣어도 문구용품으로서의 기능은 똑같아요. 필요할 때 꺼내 쓰면 되거든요! (단, 무지개 색깔 순서로 예쁘게 꽂고 싶다면 순서가 중요해질 수도 있어요 🌈)
+                        </div>
+                    </article>
+
+                    <article class="example-card example-card--less" data-example="snack-bag" tabindex="0" role="button" aria-pressed="false">
+                        <div class="example-card__toggle">+</div>
+                        <div class="example-card__icon">🍿</div>
+                        <h3 class="example-card__title">과자 봉지</h3>
+                        <p class="example-card__description">
+                            봉지 안에 여러 개의 과자가 들어있어요
+                        </p>
+                        <div class="example-card__reason">
+                            <button class="example-card__reason-close" aria-label="닫기">×</button>
+                            <strong>왜 순서가 덜 중요할까요?</strong><br>
+                            어떤 과자를 먼저 먹든 맛있기는 마찬가지예요! 과자들이 봉지 안에서 어떤 순서로 있든 상관없죠. 😋
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="bottom-section">
+                <div class="teacher-message">
+                    <p class="teacher-message__text">
+                        <strong>같은 '모음'이라도 어떤 것들은 나열 순서 자체가 의미예요.</strong> 
+                        순서가 중요한 데이터를 우리는 <strong>'순차적 데이터'</strong>라고 부릅니다! 
+                        순서가 바뀌면 전혀 다른 의미가 되는 거죠. 🎯
+                    </p>
+                </div>
+
+                <div class="check-question">
+                    <h3 class="check-question__title">🤔 생각해보기</h3>
+                    <p class="check-question__content">
+                        시간표에서 '수학→체육'과<br>'체육→수학'은 뭐가 다를까요?
+                    </p>
+                    <textarea 
+                        class="check-question__input" 
+                        rows="2" 
+                        placeholder="여러분의 생각을 적어보세요..."
+                        aria-label="시간표 순서 차이에 대한 생각 입력"
+                    ></textarea>
+                </div>
+            </section>
+        </main>
+
+        <div class="transition-message" id="transition-message">
+            🎉 맞아요! 순서를 말할 때 꼭 필요한 게 <strong>인덱스/위치</strong>입니다!
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const exampleCards = document.querySelectorAll('.example-card');
+        const checkInput = document.querySelector('.check-question__input');
+        const transitionMessage = document.getElementById('transition-message');
+
+        // State
+        let activeCards = new Set();
+        let inputTimer = null;
+
+        // Card interaction
+        function toggleCard(card) {
+            const exampleId = card.dataset.example;
+            const reason = card.querySelector('.example-card__reason');
+            const toggle = card.querySelector('.example-card__toggle');
+            const isActive = activeCards.has(exampleId);
+            
+            if (isActive) {
+                activeCards.delete(exampleId);
+                card.classList.remove('example-card--active');
+                card.setAttribute('aria-pressed', 'false');
+                reason.classList.remove('is-visible');
+                toggle.textContent = '+';
+            } else {
+                activeCards.add(exampleId);
+                card.classList.add('example-card--active');
+                card.setAttribute('aria-pressed', 'true');
+                reason.classList.add('is-visible');
+                toggle.textContent = '−';
+            }
+            
+            checkProgress();
+        }
+
+        // Check progress
+        function checkProgress() {
+            const hasActiveCards = activeCards.size >= 2; // At least 2 cards explored
+            const hasInput = checkInput.value.trim().length > 10; // Meaningful input
+            
+            if (hasActiveCards && hasInput) {
+                showTransitionMessage();
+            }
+        }
+
+        // Show transition message
+        function showTransitionMessage() {
+            transitionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                transitionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Event listeners
+        exampleCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Don't toggle if clicking the close button
+                if (!e.target.classList.contains('example-card__reason-close')) {
+                    toggleCard(card);
+                }
+            });
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleCard(card);
+                }
+            });
+            
+            // Close button event
+            const closeBtn = card.querySelector('.example-card__reason-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const exampleId = card.dataset.example;
+                    if (activeCards.has(exampleId)) {
+                        toggleCard(card);
+                    }
+                });
+            }
+        });
+
+        // Input monitoring with debounce
+        checkInput.addEventListener('input', () => {
+            clearTimeout(inputTimer);
+            inputTimer = setTimeout(checkProgress, 500);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target === checkInput) return;
+            
+            const cardIndex = parseInt(e.key) - 1;
+            if (cardIndex >= 0 && cardIndex < exampleCards.length) {
+                e.preventDefault();
+                toggleCard(exampleCards[cardIndex]);
+            }
+        });
+
+        // Focus management
+        exampleCards.forEach((card, index) => {
+            card.addEventListener('keydown', (e) => {
+                const currentColumn = card.closest('.comparison-column');
+                const columnCards = Array.from(currentColumn.querySelectorAll('.example-card'));
+                const currentIndex = columnCards.indexOf(card);
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        const nextCard = columnCards[currentIndex + 1] || columnCards[0];
+                        nextCard.focus();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        const prevCard = columnCards[currentIndex - 1] || columnCards[columnCards.length - 1];
+                        prevCard.focus();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        // Move to other column
+                        const otherColumn = currentColumn.nextElementSibling || currentColumn.previousElementSibling;
+                        if (otherColumn) {
+                            const otherCards = otherColumn.querySelectorAll('.example-card');
+                            const targetCard = otherCards[Math.min(currentIndex, otherCards.length - 1)];
+                            targetCard.focus();
+                        }
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        // Move to other column
+                        const otherColumn2 = currentColumn.previousElementSibling || currentColumn.nextElementSibling;
+                        if (otherColumn2) {
+                            const otherCards2 = otherColumn2.querySelectorAll('.example-card');
+                            const targetCard2 = otherCards2[Math.min(currentIndex, otherCards2.length - 1)];
+                            targetCard2.focus();
+                        }
+                        break;
+                }
+            });
+        });
+
+        // Auto-focus hint
+        setTimeout(() => {
+            if (activeCards.size === 0) {
+                exampleCards[0].focus();
+            }
+        }, 2000);
+
+        // Educational hints
+        setTimeout(() => {
+            if (activeCards.size === 0) {
+                // Subtle hint animation
+                exampleCards[0].style.animation = 'pulse 1s ease-in-out 3';
+            }
+        }, 5000);
+    })();
+    </script>
+</body>
+</html>

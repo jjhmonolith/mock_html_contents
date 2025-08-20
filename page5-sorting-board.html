@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5페이지 — 참여보드A: 카드 순서 정렬(위치만)</title>
+    <meta name="description" content="섞인 정류장 카드를 올바른 경로로 배열하여 정렬 전후 변화를 체감하는 협업 보드 활동">
+    <meta property="og:title" content="5페이지 — 참여보드A: 카드 순서 정렬(위치만)">
+    <meta property="og:description" content="섞인 정류장 카드를 올바른 경로로 배열하여 정렬 전후 변화를 체감하는 협업 보드 활동">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 참여보드A - 카드 순서 정렬
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 드래그 앤 드롭 카드 정렬 시뮬레이션
+         * - 협업 보드 형태의 학습 활동
+         * - 1300px 기준 레이아웃 최적화
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #6366F1;
+            --secondary: #EC4899;
+            --accent: #10B981;
+            --warning: #F59E0B;
+            --success: #059669;
+            --error: #EF4444;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-secondary: linear-gradient(135deg, #EC4899 0%, #BE185D 100%);
+            --gradient-accent: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --gradient-warning: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --transition: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-warning);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 20"><path d="M10 10 L20 5 L30 15 L40 10 L50 5 L60 15 L70 10" stroke="white" stroke-width="2" fill="none" opacity="0.2"/></svg>') repeat;
+            animation: route-move 12s linear infinite;
+        }
+
+        @keyframes route-move {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-80px); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Mission Brief */
+        .mission-brief {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--warning);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .mission-brief::before {
+            content: '🎯';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background: var(--warning);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .mission-brief__title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .mission-brief__content {
+            font-size: 0.875rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Board Container */
+        .board-container {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        /* Sorting Board */
+        .sorting-board {
+            flex: 2;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .board-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .board-zones {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .zone {
+            flex: 1;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all var(--transition);
+            min-height: 80px;
+        }
+
+        .zone--mixed {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
+        }
+
+        .zone--sorted {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--accent);
+        }
+
+        .zone--active {
+            border-style: solid;
+            box-shadow: var(--shadow);
+            transform: scale(1.02);
+        }
+
+        .zone__label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            flex-shrink: 0;
+        }
+
+        .zone--mixed .zone__label {
+            color: var(--error);
+        }
+
+        .zone--sorted .zone__label {
+            color: var(--accent);
+        }
+
+        .cards-container {
+            flex: 1;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Station Cards */
+        .station-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            cursor: grab;
+            transition: all var(--transition);
+            user-select: none;
+            position: relative;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .station-card:active {
+            cursor: grabbing;
+        }
+
+        .station-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .station-card--dragging {
+            transform: rotate(5deg);
+            opacity: 0.8;
+            z-index: 10;
+        }
+
+        .station-card__icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .station-card__name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .station-card__detail {
+            font-size: 0.625rem;
+            color: var(--text-light);
+        }
+
+        .station-card--correct {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        }
+
+        .station-card--wrong {
+            border-color: var(--error);
+            background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        /* Control Panel */
+        .control-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .roles-panel {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--secondary);
+        }
+
+        .roles-panel__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .roles-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .role-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(236, 72, 153, 0.1);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }
+
+        .role-item__icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .role-item__text {
+            font-size: 0.75rem;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .action-panel {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent);
+        }
+
+        .action-panel__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .btn--primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn--primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn--secondary {
+            background: var(--gradient-accent);
+            color: white;
+        }
+
+        .btn--secondary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn--warning {
+            background: var(--gradient-warning);
+            color: white;
+        }
+
+        .btn--warning:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback-panel {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 2px solid var(--warning);
+            position: relative;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all var(--transition);
+        }
+
+        .feedback-panel.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback-panel::before {
+            content: '💭';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background: var(--warning);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .feedback-panel__content {
+            font-size: 0.875rem;
+            color: #92400E;
+            line-height: 1.5;
+            margin-top: 0.25rem;
+        }
+
+        /* Check Question */
+        .check-question {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            flex-shrink: 0;
+        }
+
+        .check-question__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .check-question__content {
+            font-size: 0.875rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .check-question__input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color var(--transition);
+        }
+
+        .check-question__input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Transition Message */
+        .transition-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-accent);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .transition-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .board-container {
+                flex-direction: column;
+            }
+
+            .control-panel {
+                flex-direction: row;
+            }
+
+            .roles-panel, .action-panel {
+                flex: 1;
+            }
+
+            .station-card {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <header>
+            <div class="header__pattern"></div>
+            <span class="page-indicator">5/10</span>
+            <div class="header__content">
+                <h1 class="header__title">참여보드A: 카드 순서 정렬</h1>
+                <p class="header__subtitle">섞인 카드를 올바른 경로로 배열해보세요! 🚌</p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="mission-brief">
+                <h2 class="mission-brief__title">미션 안내</h2>
+                <p class="mission-brief__content">
+                    <strong>섞인 '정류장 카드'를 협업 보드에서 올바른 경로로 배열</strong>해보세요. 
+                    팀원들과 역할을 나누어 시작점과 종착점의 근거를 제시하고, 중간 경유지의 순서도 논리적으로 설명해주세요.
+                </p>
+            </section>
+
+            <div class="board-container">
+                <section class="sorting-board">
+                    <h3 class="board-title">
+                        <span>🔄</span>
+                        정렬 보드
+                    </h3>
+                    
+                    <div class="board-zones">
+                        <div class="zone zone--mixed" id="mixed-zone">
+                            <div class="zone__label">섞인<br>카드</div>
+                            <div class="cards-container" id="mixed-cards">
+                                <div class="station-card" data-station="library" data-correct-order="2" draggable="true">
+                                    <div class="station-card__icon">📚</div>
+                                    <div class="station-card__name">도서관</div>
+                                    <div class="station-card__detail">2호선 201번지</div>
+                                </div>
+                                <div class="station-card" data-station="home" data-correct-order="4" draggable="true">
+                                    <div class="station-card__icon">🏠</div>
+                                    <div class="station-card__name">집</div>
+                                    <div class="station-card__detail">3호선 401번지</div>
+                                </div>
+                                <div class="station-card" data-station="school" data-correct-order="1" draggable="true">
+                                    <div class="station-card__icon">🏫</div>
+                                    <div class="station-card__name">학교</div>
+                                    <div class="station-card__detail">1호선 101번지</div>
+                                </div>
+                                <div class="station-card" data-station="market" data-correct-order="3" draggable="true">
+                                    <div class="station-card__icon">🏪</div>
+                                    <div class="station-card__name">시장</div>
+                                    <div class="station-card__detail">2호선 301번지</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone zone--sorted" id="sorted-zone">
+                            <div class="zone__label">정렬된<br>경로</div>
+                            <div class="cards-container" id="sorted-cards">
+                                <!-- Cards will be dropped here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="control-panel">
+                    <div class="roles-panel">
+                        <h3 class="roles-panel__title">👥 팀 역할</h3>
+                        <div class="roles-list">
+                            <div class="role-item">
+                                <div class="role-item__icon">🎯</div>
+                                <div class="role-item__text"><strong>정렬가:</strong> 카드 배치</div>
+                            </div>
+                            <div class="role-item">
+                                <div class="role-item__icon">🔍</div>
+                                <div class="role-item__text"><strong>검토자:</strong> 근거 말하기</div>
+                            </div>
+                            <div class="role-item">
+                                <div class="role-item__icon">📝</div>
+                                <div class="role-item__text"><strong>기록자:</strong> 최종 스냅샷</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-panel">
+                        <h3 class="action-panel__title">🎮 액션</h3>
+                        <div class="action-buttons">
+                            <button class="btn btn--primary" id="shuffle-btn">카드 섞기</button>
+                            <button class="btn btn--secondary" id="check-btn" disabled>순서 검토</button>
+                            <button class="btn btn--warning" id="reset-btn">다시 시작</button>
+                        </div>
+                    </div>
+                    
+                    <div class="feedback-panel" id="feedback-panel">
+                        <div class="feedback-panel__content" id="feedback-text">
+                            카드를 정렬된 경로 영역으로 올바른 순서대로 드래그해보세요!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <section class="check-question">
+                <h3 class="check-question__title">🤔 생각해보기</h3>
+                <p class="check-question__content">
+                    만약 두 장소(예: 도서관과 시장)를 바꾸면 어떤 문제가 생길까요?
+                </p>
+                <textarea 
+                    class="check-question__input" 
+                    rows="2" 
+                    placeholder="순서 변경의 문제점을 적어보세요..."
+                    aria-label="순서 변경 문제점 입력"
+                    id="final-input"
+                ></textarea>
+            </section>
+        </main>
+
+        <div class="transition-message" id="transition-message">
+            🎉 훌륭해요! 이제 실제로 <strong>순서를 바꾸는 연산</strong>을 배워봅시다!
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const mixedZone = document.getElementById('mixed-zone');
+        const sortedZone = document.getElementById('sorted-zone');
+        const mixedCards = document.getElementById('mixed-cards');
+        const sortedCards = document.getElementById('sorted-cards');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const feedbackPanel = document.getElementById('feedback-panel');
+        const feedbackText = document.getElementById('feedback-text');
+        const finalInput = document.getElementById('final-input');
+        const transitionMessage = document.getElementById('transition-message');
+
+        // State
+        let draggedCard = null;
+        let sortedOrder = [];
+        let correctOrder = ['school', 'library', 'market', 'home'];
+        let isComplete = false;
+
+        // Initialize
+        function init() {
+            setupDragAndDrop();
+            showFeedback('카드를 정렬된 경로 영역으로 올바른 순서대로 드래그해보세요!');
+        }
+
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            // Add drag event listeners to all cards
+            const cards = document.querySelectorAll('.station-card');
+            cards.forEach(card => {
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+            });
+
+            // Add drop zone event listeners
+            sortedZone.addEventListener('dragover', handleDragOver);
+            sortedZone.addEventListener('drop', handleDrop);
+            mixedZone.addEventListener('dragover', handleDragOver);
+            mixedZone.addEventListener('drop', handleDrop);
+        }
+
+        // Drag handlers
+        function handleDragStart(e) {
+            draggedCard = this;
+            this.classList.add('station-card--dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.outerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('station-card--dragging');
+            draggedCard = null;
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('zone--active');
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            this.classList.remove('zone--active');
+
+            if (draggedCard) {
+                if (this.id === 'sorted-zone' || this.classList.contains('zone--sorted')) {
+                    // Moving to sorted zone
+                    const cardsContainer = this.querySelector('.cards-container');
+                    cardsContainer.appendChild(draggedCard);
+                    updateSortedOrder();
+                } else if (this.id === 'mixed-zone' || this.classList.contains('zone--mixed')) {
+                    // Moving back to mixed zone
+                    const cardsContainer = this.querySelector('.cards-container');
+                    cardsContainer.appendChild(draggedCard);
+                    updateSortedOrder();
+                }
+                
+                setupDragAndDrop(); // Re-setup listeners for moved card
+                checkProgress();
+            }
+
+            return false;
+        }
+
+        // Update sorted order
+        function updateSortedOrder() {
+            const cardsInSorted = sortedCards.querySelectorAll('.station-card');
+            sortedOrder = Array.from(cardsInSorted).map(card => card.dataset.station);
+            
+            // Enable check button if there are cards in sorted zone
+            checkBtn.disabled = sortedOrder.length === 0;
+        }
+
+        // Check if sorting is correct
+        function checkSorting() {
+            if (sortedOrder.length !== correctOrder.length) {
+                showFeedback('모든 카드를 정렬된 경로 영역에 배치해주세요!');
+                return false;
+            }
+
+            const isCorrect = sortedOrder.every((station, index) => station === correctOrder[index]);
+            
+            if (isCorrect) {
+                showFeedback('🎉 완벽합니다! 학교 → 도서관 → 시장 → 집 순서가 맞습니다!');
+                markCardsAsCorrect();
+                isComplete = true;
+                return true;
+            } else {
+                showFeedback('❌ 순서를 다시 확인해보세요. 번지수와 호선을 참고하세요!');
+                markCardsAsWrong();
+                return false;
+            }
+        }
+
+        // Visual feedback for cards
+        function markCardsAsCorrect() {
+            const cards = sortedCards.querySelectorAll('.station-card');
+            cards.forEach(card => {
+                card.classList.remove('station-card--wrong');
+                card.classList.add('station-card--correct');
+            });
+        }
+
+        function markCardsAsWrong() {
+            const cards = sortedCards.querySelectorAll('.station-card');
+            cards.forEach(card => {
+                card.classList.remove('station-card--correct');
+                card.classList.add('station-card--wrong');
+            });
+            
+            // Reset after animation
+            setTimeout(() => {
+                cards.forEach(card => card.classList.remove('station-card--wrong'));
+            }, 500);
+        }
+
+        // Show feedback
+        function showFeedback(message) {
+            feedbackText.textContent = message;
+            feedbackPanel.classList.add('is-visible');
+        }
+
+        // Shuffle cards
+        function shuffleCards() {
+            const cards = Array.from(mixedCards.querySelectorAll('.station-card'));
+            
+            // Fisher-Yates shuffle
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                mixedCards.insertBefore(cards[j], cards[i].nextSibling);
+            }
+            
+            showFeedback('카드를 섞었습니다! 올바른 경로 순서로 정렬해보세요.');
+        }
+
+        // Reset to initial state
+        function resetCards() {
+            const allCards = document.querySelectorAll('.station-card');
+            allCards.forEach(card => {
+                card.classList.remove('station-card--correct', 'station-card--wrong');
+                mixedCards.appendChild(card);
+            });
+            
+            sortedOrder = [];
+            isComplete = false;
+            checkBtn.disabled = true;
+            showFeedback('카드를 정렬된 경로 영역으로 올바른 순서대로 드래그해보세요!');
+        }
+
+        // Check overall progress
+        function checkProgress() {
+            if (isComplete && finalInput.value.trim().length > 10) {
+                showTransitionMessage();
+            }
+        }
+
+        // Show transition message
+        function showTransitionMessage() {
+            transitionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                transitionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Event listeners
+        shuffleBtn.addEventListener('click', shuffleCards);
+        checkBtn.addEventListener('click', checkSorting);
+        resetBtn.addEventListener('click', resetCards);
+
+        finalInput.addEventListener('input', () => {
+            setTimeout(checkProgress, 500);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target === finalInput) return;
+            
+            switch(e.key) {
+                case 's':
+                case 'S':
+                    e.preventDefault();
+                    shuffleCards();
+                    break;
+                case 'c':
+                case 'C':
+                    e.preventDefault();
+                    if (!checkBtn.disabled) {
+                        checkSorting();
+                    }
+                    break;
+                case 'r':
+                case 'R':
+                    e.preventDefault();
+                    resetCards();
+                    break;
+            }
+        });
+
+        // Initialize
+        init();
+        
+        // Shuffle cards initially for demo
+        setTimeout(() => {
+            shuffleCards();
+        }, 1000);
+    })();
+    </script>
+</body>
+</html>

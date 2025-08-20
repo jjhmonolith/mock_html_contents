@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="정보의 바다 속 다양한 데이터와 안전한 관리의 중요성을 소개하고, 학습자가 단원 내용을 예측해보는 활동 페이지.">
+    <meta property="og:title" content="데이터 | 단원 도입: 단원 내용 예상하기">
+    <meta property="og:description" content="정보의 바다 속 다양한 데이터와 안전한 관리의 중요성을 소개하고, 학습자가 단원 내용을 예측해보는 활동 페이지.">
+    <meta property="og:type" content="website">
+    <title>데이터 | 단원 도입: 단원 내용 예상하기</title>
+    
+    <style>
+        /* 버전: 1.0.0 | 작성일: 2025-08-20 | 담당자: Frontend Engineer */
+        
+        :root {
+            --primary: #33AFA1;
+            --primary-hover: #2B9A8E;
+            --accent: #9B8AE0;
+            --text: #1F2937;
+            --text-muted: #6B7280;
+            --bg: #FFFFFF;
+            --surface: #F7FAFC;
+            --border: #E5E7EB;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: 180ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', Pretendard, sans-serif;
+        }
+
+        [data-theme="hc"] {
+            --primary: #00D3C3;
+            --primary-hover: #00B5A8;
+            --accent: #FFD700;
+            --text: #FFFFFF;
+            --text-muted: #E0E0E0;
+            --bg: #000000;
+            --surface: #1A1A1A;
+            --border: #333333;
+        }
+
+        [data-reduce-motion="true"] * {
+            animation-duration: 0ms !important;
+            transition-duration: 0ms !important;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        html[data-font-size="small"] {
+            font-size: 14px;
+        }
+
+        html[data-font-size="large"] {
+            font-size: 18px;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            min-width: 1300px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header__content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header__left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .unit-badge {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .header__title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .header__subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .header__right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-indicator {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            padding: 0.25rem 0.75rem;
+            background: var(--surface);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        /* UDL Toolbar */
+        .udl-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .udl-toolbar__btn {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all var(--transition);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .udl-toolbar__btn:hover {
+            background: var(--surface);
+        }
+
+        .udl-toolbar__btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .udl-toolbar__btn.is-active {
+            background: var(--primary);
+            color: var(--bg);
+            border-color: var(--primary);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .hero__illustration {
+            width: 100%;
+            min-height: 400px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero__illustration::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><path d="M0,200 Q300,100 600,200 T1200,200 L1200,400 L0,400 Z" fill="%2333AFA1" opacity="0.3"/></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero__placeholder {
+            position: relative;
+            text-align: center;
+            color: white;
+            z-index: 1;
+        }
+
+        .hero__placeholder svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1rem;
+        }
+
+        /* Learning Objectives */
+        .objectives {
+            background: var(--surface);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .objectives__title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .objectives__list {
+            list-style: none;
+        }
+
+        .objectives__list li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .objectives__list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Interaction Section */
+        .interaction {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+            align-items: flex-end;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            min-height: 44px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Character and Bubble */
+        .character-container {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all var(--transition);
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .character-container.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .character {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .bubble {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            position: relative;
+            flex: 1;
+            box-shadow: var(--shadow);
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            bottom: 20px;
+            width: 20px;
+            height: 20px;
+            background: var(--bg);
+            border-left: 2px solid var(--border);
+            border-bottom: 2px solid var(--border);
+            transform: rotate(45deg);
+        }
+
+        .bubble__text {
+            min-height: 3rem;
+        }
+
+        .bubble__controls {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .bubble__btn {
+            padding: 0.25rem 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .bubble__btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Prediction Activity */
+        .activity-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-card__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .activity-card__prompt {
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group__label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all var(--transition);
+            min-height: 44px;
+        }
+
+        .input-text:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(51, 175, 161, 0.1);
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .keyword-chip {
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        .keyword-chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .keyword-chip.is-selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .keyword-chip:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .input-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            min-height: 44px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .btn--secondary {
+            background: var(--surface);
+        }
+
+        .btn--secondary:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .btn--voice {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feedback {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .feedback.is-visible {
+            display: block;
+        }
+
+        .feedback--success {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #6EE7B7;
+        }
+
+        [data-theme="hc"] .feedback--success {
+            background: #065F46;
+            color: #D1FAE5;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer__content {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .footer__links {
+            margin-top: 1rem;
+        }
+
+        .footer__links a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .footer__links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header__content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header__title h1 {
+                font-size: 1.5rem;
+            }
+
+            .interaction {
+                grid-template-columns: 1fr;
+            }
+
+            .character-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .bubble::before {
+                left: 20px;
+                bottom: -10px;
+                transform: rotate(135deg);
+            }
+
+            .hero__illustration {
+                min-height: 300px;
+            }
+
+            .udl-toolbar {
+                width: 100%;
+            }
+
+            .udl-toolbar__btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 360px) {
+            html {
+                font-size: 14px;
+            }
+
+            .container {
+                padding: 0 0.75rem;
+            }
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Loading state */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .is-loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header__content">
+                <div class="header__left">
+                    <div class="unit-badge" aria-label="단원 2">II</div>
+                    <div class="header__title">
+                        <h1>데이터</h1>
+                        <div class="header__subtitle">01 데이터 압축과 암호화 · 02 빅데이터의 개념과 분석</div>
+                    </div>
+                </div>
+                <div class="header__right">
+                    <div class="udl-toolbar" role="toolbar" aria-label="학습 지원 도구">
+                        <button class="udl-toolbar__btn" id="btn-contrast" aria-pressed="false" aria-label="고대비 모드">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 2v20M12 2a10 10 0 0 1 0 20"/>
+                            </svg>
+                            고대비
+                        </button>
+                        <button class="udl-toolbar__btn" id="btn-easy" aria-pressed="false" aria-label="쉬운 설명">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                            </svg>
+                            쉬운 설명
+                        </button>
+                        <button class="udl-toolbar__btn" id="btn-motion" aria-pressed="false" aria-label="모션 줄이기">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                <path d="M9 9l6 6M15 9l-6 6"/>
+                            </svg>
+                            모션 줄이기
+                        </button>
+                        <button class="udl-toolbar__btn" id="btn-font-minus" aria-label="글자 크기 작게">가-</button>
+                        <button class="udl-toolbar__btn" id="btn-font-plus" aria-label="글자 크기 크게">가+</button>
+                        <button class="udl-toolbar__btn" id="btn-tts" aria-label="텍스트 읽어주기">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                            읽기
+                        </button>
+                    </div>
+                    <div class="page-indicator" aria-label="현재 페이지">1/1</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="hero">
+                <figure class="hero__illustration" role="img" aria-label="정보의 바다를 항해하는 사람들, 다양한 형태의 데이터 오브젝트">
+                    <div class="hero__placeholder">
+                        <svg viewBox="0 0 120 120" fill="white" aria-hidden="true">
+                            <path d="M60 20 L80 40 L80 80 L60 100 L40 80 L40 40 Z" opacity="0.3"/>
+                            <circle cx="30" cy="30" r="10" opacity="0.5"/>
+                            <circle cx="90" cy="30" r="8" opacity="0.4"/>
+                            <circle cx="30" cy="90" r="12" opacity="0.6"/>
+                            <circle cx="90" cy="90" r="6" opacity="0.3"/>
+                            <rect x="50" y="50" width="20" height="20" rx="4" opacity="0.8"/>
+                        </svg>
+                        <figcaption>정보의 바다에서 다양한 데이터를 탐색하는 모습</figcaption>
+                    </div>
+                </figure>
+            </section>
+
+            <section class="objectives">
+                <h2 class="objectives__title">학습 목표</h2>
+                <ul class="objectives__list">
+                    <li>인터넷에서 생성되는 다양한 데이터의 예를 이해한다.</li>
+                    <li>데이터 활용과 안전한 관리의 중요성을 인식한다.</li>
+                    <li>본 단원 핵심 키워드를 예측한다(압축/암호화/빅데이터/분석).</li>
+                </ul>
+            </section>
+
+            <section class="interaction">
+                <div>
+                    <button class="btn-primary" id="btn-start" aria-label="배울 내용 예상하기 시작">
+                        배울 내용 예상하기
+                    </button>
+                </div>
+                <div class="character-container" id="character-container" aria-hidden="true">
+                    <div class="character" aria-label="친근한 안내 캐릭터">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="white" aria-hidden="true">
+                            <circle cx="20" cy="20" r="18"/>
+                            <circle cx="14" cy="16" r="2" fill="#9B8AE0"/>
+                            <circle cx="26" cy="16" r="2" fill="#9B8AE0"/>
+                            <path d="M14 24 Q20 28 26 24" stroke="#9B8AE0" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="bubble" role="region" aria-live="polite" aria-atomic="true">
+                        <div class="bubble__text" id="bubble-text"></div>
+                        <div class="bubble__controls">
+                            <button class="bubble__btn" id="btn-replay" aria-label="다시 읽기">다시 읽기</button>
+                            <button class="bubble__btn" id="btn-tts-bubble" aria-label="음성으로 듣기">음성 듣기</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="activity-card">
+                <h2 class="activity-card__title">예측 활동</h2>
+                <p class="activity-card__prompt">그림을 보고 이번 단원에서 배울 내용을 예상해 보자.</p>
+                
+                <div class="input-group">
+                    <label class="input-group__label" for="prediction-input">
+                        내가 예상하는 학습 내용
+                    </label>
+                    <textarea 
+                        class="input-text" 
+                        id="prediction-input" 
+                        rows="3"
+                        placeholder="이번 단원에서 배울 내용을 자유롭게 적어보세요..."
+                        aria-describedby="input-help"
+                    ></textarea>
+                    <small id="input-help" class="sr-only">키워드를 선택하거나 직접 입력할 수 있습니다</small>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group__label">키워드 선택하기</div>
+                    <div class="keywords" role="group" aria-label="학습 키워드 선택">
+                        <button class="keyword-chip" data-keyword="데이터" aria-pressed="false">데이터</button>
+                        <button class="keyword-chip" data-keyword="압축" aria-pressed="false">압축</button>
+                        <button class="keyword-chip" data-keyword="암호화" aria-pressed="false">암호화</button>
+                        <button class="keyword-chip" data-keyword="빅데이터" aria-pressed="false">빅데이터</button>
+                        <button class="keyword-chip" data-keyword="분석" aria-pressed="false">분석</button>
+                        <button class="keyword-chip" data-keyword="보안/안전" aria-pressed="false">보안/안전</button>
+                        <button class="keyword-chip" data-keyword="활용" aria-pressed="false">활용</button>
+                    </div>
+                </div>
+
+                <div class="input-controls">
+                    <button class="btn btn--voice" id="btn-voice" aria-label="음성으로 입력">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                        음성 입력
+                    </button>
+                    <button class="btn btn--secondary" id="btn-save" aria-label="입력 내용 저장">저장하기</button>
+                    <button class="btn btn--secondary" id="btn-load" aria-label="저장된 내용 불러오기">불러오기</button>
+                    <button class="btn btn--secondary" id="btn-reset" aria-label="입력 내용 초기화">초기화</button>
+                </div>
+
+                <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer__content">
+                <p>© 2025 정보 교과 디지털 교안. 모든 권리 보유.</p>
+                <div class="footer__links">
+                    <a href="#feedback-form">피드백 보내기</a>
+                    <a href="mailto:feedback@example.com">이메일 문의</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // Constants
+        const TEXT_STANDARD = "정보의 바다라고 불리는 인터넷에는 실시간으로 다양한 데이터가 무수히 많이 만들어지고 있어. 문자, 그림, 소리, 문서, 동영상 할 것 없이 많은 데이터를 탐색할 수 있지. 이러한 데이터를 효율적으로 사용하는 것도 중요하지만 데이터를 안전하게 관리하는 것도 기억해야 해.";
+        const TEXT_EASY = "인터넷에서는 매 순간 많은 데이터가 만들어져요. 우리는 문자, 그림, 소리, 문서, 동영상 등 여러 데이터를 찾을 수 있어요. 데이터를 잘 쓰는 것도 중요하고, 안전하게 지키는 것도 중요해요.";
+        const STORAGE_KEY = 'unit2-predict';
+        const STORAGE_SETTINGS = 'unit2-settings';
+
+        // State
+        let state = {
+            isEasyMode: false,
+            isHighContrast: false,
+            isReducedMotion: false,
+            fontSize: 'normal',
+            currentText: TEXT_STANDARD,
+            isTyping: false,
+            isSpeaking: false,
+            selectedKeywords: new Set()
+        };
+
+        // DOM Elements
+        const elements = {
+            html: document.documentElement,
+            btnStart: document.getElementById('btn-start'),
+            characterContainer: document.getElementById('character-container'),
+            bubbleText: document.getElementById('bubble-text'),
+            btnReplay: document.getElementById('btn-replay'),
+            btnTtsBubble: document.getElementById('btn-tts-bubble'),
+            btnContrast: document.getElementById('btn-contrast'),
+            btnEasy: document.getElementById('btn-easy'),
+            btnMotion: document.getElementById('btn-motion'),
+            btnFontMinus: document.getElementById('btn-font-minus'),
+            btnFontPlus: document.getElementById('btn-font-plus'),
+            btnTts: document.getElementById('btn-tts'),
+            predictionInput: document.getElementById('prediction-input'),
+            keywordChips: document.querySelectorAll('.keyword-chip'),
+            btnVoice: document.getElementById('btn-voice'),
+            btnSave: document.getElementById('btn-save'),
+            btnLoad: document.getElementById('btn-load'),
+            btnReset: document.getElementById('btn-reset'),
+            feedback: document.getElementById('feedback')
+        };
+
+        // Utility Functions
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem(STORAGE_SETTINGS);
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    state = { ...state, ...settings };
+                    applySettings();
+                }
+            } catch (e) {
+                console.log('Settings load failed:', e);
+            }
+        }
+
+        function saveSettings() {
+            try {
+                const settings = {
+                    isEasyMode: state.isEasyMode,
+                    isHighContrast: state.isHighContrast,
+                    isReducedMotion: state.isReducedMotion,
+                    fontSize: state.fontSize
+                };
+                localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings));
+            } catch (e) {
+                console.log('Settings save failed:', e);
+            }
+        }
+
+        function applySettings() {
+            // High contrast
+            if (state.isHighContrast) {
+                elements.html.setAttribute('data-theme', 'hc');
+                elements.btnContrast.classList.add('is-active');
+                elements.btnContrast.setAttribute('aria-pressed', 'true');
+            }
+
+            // Easy mode
+            if (state.isEasyMode) {
+                state.currentText = TEXT_EASY;
+                elements.btnEasy.classList.add('is-active');
+                elements.btnEasy.setAttribute('aria-pressed', 'true');
+            }
+
+            // Reduced motion
+            if (state.isReducedMotion) {
+                elements.html.setAttribute('data-reduce-motion', 'true');
+                elements.btnMotion.classList.add('is-active');
+                elements.btnMotion.setAttribute('aria-pressed', 'true');
+            }
+
+            // Font size
+            if (state.fontSize !== 'normal') {
+                elements.html.setAttribute('data-font-size', state.fontSize);
+            }
+        }
+
+        function typeText(text, element, callback) {
+            if (state.isReducedMotion || state.isTyping) {
+                element.textContent = text;
+                if (callback) callback();
+                return;
+            }
+
+            state.isTyping = true;
+            element.textContent = '';
+            let index = 0;
+
+            function type() {
+                if (index < text.length) {
+                    element.textContent += text[index];
+                    index++;
+                    const delay = 20 + Math.random() * 15;
+                    setTimeout(type, delay);
+                } else {
+                    state.isTyping = false;
+                    if (callback) callback();
+                }
+            }
+
+            type();
+        }
+
+        function showFeedback(message, type = 'success') {
+            elements.feedback.textContent = message;
+            elements.feedback.className = `feedback feedback--${type} is-visible`;
+            setTimeout(() => {
+                elements.feedback.classList.remove('is-visible');
+            }, 3000);
+        }
+
+        // TTS Functions
+        function speak(text) {
+            if (!('speechSynthesis' in window)) {
+                showFeedback('음성 읽기가 지원되지 않는 브라우저입니다.', 'error');
+                return;
+            }
+
+            if (state.isSpeaking) {
+                window.speechSynthesis.cancel();
+                state.isSpeaking = false;
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ko-KR';
+            utterance.rate = 0.9;
+            
+            utterance.onstart = () => {
+                state.isSpeaking = true;
+            };
+            
+            utterance.onend = () => {
+                state.isSpeaking = false;
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Event Handlers
+        function handleStartClick() {
+            elements.characterContainer.classList.add('is-visible');
+            elements.characterContainer.setAttribute('aria-hidden', 'false');
+            typeText(state.currentText, elements.bubbleText);
+        }
+
+        function handleReplayClick() {
+            typeText(state.currentText, elements.bubbleText);
+        }
+
+        function handleTtsBubbleClick() {
+            speak(state.currentText);
+        }
+
+        function handleContrastToggle() {
+            state.isHighContrast = !state.isHighContrast;
+            if (state.isHighContrast) {
+                elements.html.setAttribute('data-theme', 'hc');
+                elements.btnContrast.classList.add('is-active');
+                elements.btnContrast.setAttribute('aria-pressed', 'true');
+            } else {
+                elements.html.removeAttribute('data-theme');
+                elements.btnContrast.classList.remove('is-active');
+                elements.btnContrast.setAttribute('aria-pressed', 'false');
+            }
+            saveSettings();
+        }
+
+        function handleEasyToggle() {
+            state.isEasyMode = !state.isEasyMode;
+            state.currentText = state.isEasyMode ? TEXT_EASY : TEXT_STANDARD;
+            
+            if (state.isEasyMode) {
+                elements.btnEasy.classList.add('is-active');
+                elements.btnEasy.setAttribute('aria-pressed', 'true');
+            } else {
+                elements.btnEasy.classList.remove('is-active');
+                elements.btnEasy.setAttribute('aria-pressed', 'false');
+            }
+            
+            if (elements.characterContainer.classList.contains('is-visible')) {
+                typeText(state.currentText, elements.bubbleText);
+            }
+            
+            saveSettings();
+        }
+
+        function handleMotionToggle() {
+            state.isReducedMotion = !state.isReducedMotion;
+            if (state.isReducedMotion) {
+                elements.html.setAttribute('data-reduce-motion', 'true');
+                elements.btnMotion.classList.add('is-active');
+                elements.btnMotion.setAttribute('aria-pressed', 'true');
+            } else {
+                elements.html.removeAttribute('data-reduce-motion');
+                elements.btnMotion.classList.remove('is-active');
+                elements.btnMotion.setAttribute('aria-pressed', 'false');
+            }
+            saveSettings();
+        }
+
+        function handleFontSize(direction) {
+            const sizes = ['small', 'normal', 'large'];
+            let currentIndex = sizes.indexOf(state.fontSize);
+            
+            if (direction === 'increase' && currentIndex < sizes.length - 1) {
+                currentIndex++;
+            } else if (direction === 'decrease' && currentIndex > 0) {
+                currentIndex--;
+            }
+            
+            state.fontSize = sizes[currentIndex];
+            
+            if (state.fontSize === 'normal') {
+                elements.html.removeAttribute('data-font-size');
+            } else {
+                elements.html.setAttribute('data-font-size', state.fontSize);
+            }
+            
+            saveSettings();
+        }
+
+        function handleKeywordClick(event) {
+            const chip = event.currentTarget;
+            const keyword = chip.dataset.keyword;
+            const isSelected = chip.classList.contains('is-selected');
+            
+            if (isSelected) {
+                chip.classList.remove('is-selected');
+                chip.setAttribute('aria-pressed', 'false');
+                state.selectedKeywords.delete(keyword);
+            } else {
+                chip.classList.add('is-selected');
+                chip.setAttribute('aria-pressed', 'true');
+                state.selectedKeywords.add(keyword);
+            }
+            
+            updateInputFromKeywords();
+        }
+
+        function updateInputFromKeywords() {
+            const currentText = elements.predictionInput.value;
+            const keywordText = Array.from(state.selectedKeywords).join(', ');
+            
+            if (state.selectedKeywords.size > 0) {
+                const baseText = currentText.replace(/\[.*?\]$/, '').trim();
+                elements.predictionInput.value = baseText + (baseText ? ' ' : '') + '[' + keywordText + ']';
+            }
+        }
+
+        function handleVoiceInput() {
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                showFeedback('음성 입력이 지원되지 않는 브라우저입니다.', 'error');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            recognition.lang = 'ko-KR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onstart = () => {
+                elements.btnVoice.classList.add('is-loading');
+                showFeedback('음성을 인식하고 있습니다...', 'info');
+            };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                elements.predictionInput.value += transcript + ' ';
+                showFeedback('음성 입력이 완료되었습니다.', 'success');
+            };
+            
+            recognition.onerror = () => {
+                showFeedback('음성 인식에 실패했습니다.', 'error');
+            };
+            
+            recognition.onend = () => {
+                elements.btnVoice.classList.remove('is-loading');
+            };
+            
+            recognition.start();
+        }
+
+        function handleSave() {
+            try {
+                const data = {
+                    prediction: elements.predictionInput.value,
+                    keywords: Array.from(state.selectedKeywords),
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                showFeedback('저장되었습니다.', 'success');
+            } catch (e) {
+                showFeedback('저장에 실패했습니다.', 'error');
+            }
+        }
+
+        function handleLoad() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    elements.predictionInput.value = data.prediction || '';
+                    
+                    // Reset keywords
+                    elements.keywordChips.forEach(chip => {
+                        chip.classList.remove('is-selected');
+                        chip.setAttribute('aria-pressed', 'false');
+                    });
+                    state.selectedKeywords.clear();
+                    
+                    // Load saved keywords
+                    if (data.keywords && Array.isArray(data.keywords)) {
+                        data.keywords.forEach(keyword => {
+                            const chip = document.querySelector(`[data-keyword="${keyword}"]`);
+                            if (chip) {
+                                chip.classList.add('is-selected');
+                                chip.setAttribute('aria-pressed', 'true');
+                                state.selectedKeywords.add(keyword);
+                            }
+                        });
+                    }
+                    
+                    showFeedback('불러왔습니다.', 'success');
+                } else {
+                    showFeedback('저장된 내용이 없습니다.', 'info');
+                }
+            } catch (e) {
+                showFeedback('불러오기에 실패했습니다.', 'error');
+            }
+        }
+
+        function handleReset() {
+            elements.predictionInput.value = '';
+            elements.keywordChips.forEach(chip => {
+                chip.classList.remove('is-selected');
+                chip.setAttribute('aria-pressed', 'false');
+            });
+            state.selectedKeywords.clear();
+            showFeedback('초기화 완료', 'success');
+        }
+
+        // Keyboard shortcuts
+        function handleKeyboardShortcuts(event) {
+            if (event.altKey) {
+                switch(event.key.toLowerCase()) {
+                    case 'h':
+                        event.preventDefault();
+                        handleContrastToggle();
+                        break;
+                    case 'r':
+                        event.preventDefault();
+                        handleMotionToggle();
+                        break;
+                    case '=':
+                    case '+':
+                        event.preventDefault();
+                        handleFontSize('increase');
+                        break;
+                    case '-':
+                        event.preventDefault();
+                        handleFontSize('decrease');
+                        break;
+                }
+            }
+        }
+
+        // Initialize
+        function init() {
+            // Load saved settings
+            loadSettings();
+
+            // Check for prefers-reduced-motion
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                state.isReducedMotion = true;
+                elements.html.setAttribute('data-reduce-motion', 'true');
+                elements.btnMotion.classList.add('is-active');
+                elements.btnMotion.setAttribute('aria-pressed', 'true');
+            }
+
+            // Event listeners
+            elements.btnStart.addEventListener('click', handleStartClick);
+            elements.btnReplay.addEventListener('click', handleReplayClick);
+            elements.btnTtsBubble.addEventListener('click', handleTtsBubbleClick);
+            elements.btnContrast.addEventListener('click', handleContrastToggle);
+            elements.btnEasy.addEventListener('click', handleEasyToggle);
+            elements.btnMotion.addEventListener('click', handleMotionToggle);
+            elements.btnFontMinus.addEventListener('click', () => handleFontSize('decrease'));
+            elements.btnFontPlus.addEventListener('click', () => handleFontSize('increase'));
+            elements.btnTts.addEventListener('click', () => speak(state.currentText));
+            elements.btnVoice.addEventListener('click', handleVoiceInput);
+            elements.btnSave.addEventListener('click', handleSave);
+            elements.btnLoad.addEventListener('click', handleLoad);
+            elements.btnReset.addEventListener('click', handleReset);
+
+            elements.keywordChips.forEach(chip => {
+                chip.addEventListener('click', handleKeywordClick);
+            });
+
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+
+            // Prevent form submission on Enter
+            elements.predictionInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Start the app
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
+</body>
+</html>

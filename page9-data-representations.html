@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9페이지 — 같은 데이터, 다른 표현</title>
+    <meta name="description" content="동일한 아침 루틴 데이터를 리스트, 타임라인, 표 형태로 비교하여 각 표현의 장단점을 학습하는 페이지">
+    <meta property="og:title" content="9페이지 — 같은 데이터, 다른 표현">
+    <meta property="og:description" content="동일한 아침 루틴 데이터를 리스트, 타임라인, 표 형태로 비교하여 각 표현의 장단점을 학습하는 페이지">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 같은 데이터, 다른 표현
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 3가지 데이터 표현 방식 비교
+         * - 아침 루틴 4단계 데이터
+         * - 1300px 기준 레이아웃 최적화
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #6366F1;
+            --secondary: #EC4899;
+            --accent: #10B981;
+            --warning: #F59E0B;
+            --success: #059669;
+            --danger: #EF4444;
+            --info: #3B82F6;
+            --purple: #8B5CF6;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-secondary: linear-gradient(135deg, #EC4899 0%, #BE185D 100%);
+            --gradient-accent: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --gradient-warning: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --gradient-info: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            --transition: 250ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-info);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 20"><text x="10" y="15" font-size="10" fill="white" opacity="0.2">1.2.3</text><path d="M40 10 L60 10 M50 5 L50 15" stroke="white" stroke-width="1" opacity="0.25"/><rect x="80" y="8" width="15" height="4" fill="white" opacity="0.15"/><rect x="100" y="6" width="15" height="8" fill="white" opacity="0.2"/></svg>') repeat;
+            animation: representations-flow 18s linear infinite;
+        }
+
+        @keyframes representations-flow {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-150px); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Concept Introduction */
+        .concept-intro {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--info);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .concept-intro__title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--info);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .concept-intro__description {
+            font-size: 0.875rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Data Display Section */
+        .data-display {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .representation {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .representation:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .representation--selected {
+            border-color: var(--warning);
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+        }
+
+        .representation--list {
+            border-color: var(--primary);
+        }
+
+        .representation--list.representation--selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+        }
+
+        .representation--timeline {
+            border-color: var(--accent);
+        }
+
+        .representation--timeline.representation--selected {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        }
+
+        .representation--table {
+            border-color: var(--secondary);
+        }
+
+        .representation--table.representation--selected {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, #FCE7F3 0%, #F9A8D4 100%);
+        }
+
+        .representation__header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        .representation__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .representation__icon {
+            font-size: 1.25rem;
+        }
+
+        .representation__content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* List Representation */
+        .routine-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .routine-list__item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary);
+            transition: all var(--transition);
+        }
+
+        .routine-list__item:hover {
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateX(4px);
+        }
+
+        .routine-list__number {
+            width: 1.5rem;
+            height: 1.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .routine-list__icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .routine-list__text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* Timeline Representation */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), #34D399);
+        }
+
+        .timeline__item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+        }
+
+        .timeline__item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline__dot {
+            position: absolute;
+            left: -2rem;
+            top: 0.125rem;
+            width: 1rem;
+            height: 1rem;
+            background: var(--accent);
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            z-index: 2;
+        }
+
+        .timeline__content {
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .timeline__time {
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline__action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* Table Representation */
+        .routine-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .routine-table th {
+            background: var(--secondary);
+            color: white;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .routine-table th:first-child {
+            border-radius: 0.5rem 0 0 0;
+        }
+
+        .routine-table th:last-child {
+            border-radius: 0 0.5rem 0 0;
+        }
+
+        .routine-table td {
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            transition: background-color var(--transition);
+        }
+
+        .routine-table tr:hover td {
+            background: rgba(236, 72, 153, 0.1);
+        }
+
+        .routine-table tr:last-child td:first-child {
+            border-radius: 0 0 0 0.5rem;
+        }
+
+        .routine-table tr:last-child td:last-child {
+            border-radius: 0 0 0.5rem 0;
+        }
+
+        .routine-table__icon {
+            font-size: 1rem;
+            margin-right: 0.25rem;
+        }
+
+        .routine-table__time {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .routine-table__duration {
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+
+        /* Advantages Panel */
+        .advantages-panel {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--warning);
+            margin-top: 0.75rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all var(--transition);
+        }
+
+        .advantages-panel.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .advantages-panel__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .advantages-panel__content {
+            font-size: 0.75rem;
+            color: #92400E;
+            line-height: 1.4;
+            background: rgba(245, 158, 11, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: flex;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .teacher-message {
+            flex: 2;
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 2px solid var(--warning);
+            position: relative;
+        }
+
+        .teacher-message::before {
+            content: '👨‍🏫';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background: var(--warning);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .teacher-message__text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #92400E;
+            line-height: 1.6;
+            margin-top: 0.25rem;
+        }
+
+        .check-question {
+            flex: 1;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--purple);
+        }
+
+        .check-question__title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--purple);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .check-question__content {
+            font-size: 0.875rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .check-question__input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color var(--transition);
+        }
+
+        .check-question__input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        /* Transition Message */
+        .transition-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-accent);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .transition-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .data-display {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .bottom-section {
+                flex-direction: column;
+            }
+
+            .routine-table {
+                font-size: 0.75rem;
+            }
+
+            .routine-table th,
+            .routine-table td {
+                padding: 0.5rem 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <header>
+            <div class="header__pattern"></div>
+            <span class="page-indicator">9/10</span>
+            <div class="header__content">
+                <h1 class="header__title">같은 데이터, 다른 표현</h1>
+                <p class="header__subtitle">표현은 달라도 순서 정보는 유지돼요! 📊</p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="concept-intro">
+                <h2 class="concept-intro__title">
+                    <span>🔄</span>
+                    하나의 데이터, 세 가지 표현
+                </h2>
+                <p class="concept-intro__description">
+                    동일한 <strong>"아침 루틴 4단계"</strong> 데이터를 리스트, 타임라인, 표로 표현했습니다. 
+                    표현 방식이 달라도 <strong>순서 정보는 그대로</strong> 유지됩니다!
+                </p>
+            </section>
+
+            <section class="data-display">
+                <!-- List Representation -->
+                <div class="representation representation--list" data-type="list" tabindex="0">
+                    <div class="representation__header">
+                        <span class="representation__icon">📝</span>
+                        <h3 class="representation__title">번호 리스트</h3>
+                    </div>
+                    
+                    <div class="representation__content">
+                        <ol class="routine-list">
+                            <li class="routine-list__item">
+                                <div class="routine-list__number">1</div>
+                                <div class="routine-list__icon">⏰</div>
+                                <div class="routine-list__text">알람 끄기</div>
+                            </li>
+                            <li class="routine-list__item">
+                                <div class="routine-list__number">2</div>
+                                <div class="routine-list__icon">🚿</div>
+                                <div class="routine-list__text">샤워하기</div>
+                            </li>
+                            <li class="routine-list__item">
+                                <div class="routine-list__number">3</div>
+                                <div class="routine-list__icon">🍞</div>
+                                <div class="routine-list__text">아침 먹기</div>
+                            </li>
+                            <li class="routine-list__item">
+                                <div class="routine-list__number">4</div>
+                                <div class="routine-list__icon">🎒</div>
+                                <div class="routine-list__text">등교 준비</div>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="advantages-panel" id="advantages-list">
+                        <div class="advantages-panel__title">📝 리스트의 장점</div>
+                        <div class="advantages-panel__content">
+                            <strong>순서가 명확</strong>하고 <strong>단계별로 이해</strong>하기 쉬워요. 
+                            번호가 있어서 몇 번째 단계인지 바로 알 수 있습니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Representation -->
+                <div class="representation representation--timeline" data-type="timeline" tabindex="0">
+                    <div class="representation__header">
+                        <span class="representation__icon">⏱️</span>
+                        <h3 class="representation__title">타임라인</h3>
+                    </div>
+                    
+                    <div class="representation__content">
+                        <div class="timeline">
+                            <div class="timeline__item">
+                                <div class="timeline__dot"></div>
+                                <div class="timeline__content">
+                                    <div class="timeline__time">7:00 AM</div>
+                                    <div class="timeline__action">
+                                        <span>⏰</span>
+                                        <span>알람 끄기</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline__item">
+                                <div class="timeline__dot"></div>
+                                <div class="timeline__content">
+                                    <div class="timeline__time">7:05 AM</div>
+                                    <div class="timeline__action">
+                                        <span>🚿</span>
+                                        <span>샤워하기</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline__item">
+                                <div class="timeline__dot"></div>
+                                <div class="timeline__content">
+                                    <div class="timeline__time">7:25 AM</div>
+                                    <div class="timeline__action">
+                                        <span>🍞</span>
+                                        <span>아침 먹기</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline__item">
+                                <div class="timeline__dot"></div>
+                                <div class="timeline__content">
+                                    <div class="timeline__time">7:45 AM</div>
+                                    <div class="timeline__action">
+                                        <span>🎒</span>
+                                        <span>등교 준비</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="advantages-panel" id="advantages-timeline">
+                        <div class="advantages-panel__title">⏱️ 타임라인의 장점</div>
+                        <div class="advantages-panel__content">
+                            <strong>시간의 흐름</strong>을 직관적으로 보여주고, 
+                            <strong>연속성과 진행 과정</strong>을 시각적으로 이해할 수 있어요.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Representation -->
+                <div class="representation representation--table" data-type="table" tabindex="0">
+                    <div class="representation__header">
+                        <span class="representation__icon">📋</span>
+                        <h3 class="representation__title">표 (테이블)</h3>
+                    </div>
+                    
+                    <div class="representation__content">
+                        <table class="routine-table">
+                            <thead>
+                                <tr>
+                                    <th>순서</th>
+                                    <th>활동</th>
+                                    <th>시간</th>
+                                    <th>소요</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <span class="routine-table__icon">⏰</span>
+                                        알람 끄기
+                                    </td>
+                                    <td class="routine-table__time">7:00</td>
+                                    <td class="routine-table__duration">5분</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>
+                                        <span class="routine-table__icon">🚿</span>
+                                        샤워하기
+                                    </td>
+                                    <td class="routine-table__time">7:05</td>
+                                    <td class="routine-table__duration">20분</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>
+                                        <span class="routine-table__icon">🍞</span>
+                                        아침 먹기
+                                    </td>
+                                    <td class="routine-table__time">7:25</td>
+                                    <td class="routine-table__duration">20분</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>
+                                        <span class="routine-table__icon">🎒</span>
+                                        등교 준비
+                                    </td>
+                                    <td class="routine-table__time">7:45</td>
+                                    <td class="routine-table__duration">15분</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="advantages-panel" id="advantages-table">
+                        <div class="advantages-panel__title">📋 표의 장점</div>
+                        <div class="advantages-panel__content">
+                            <strong>여러 정보를 한눈에</strong> 비교할 수 있고, 
+                            <strong>정렬된 행과 의미 있는 열</strong>로 체계적으로 정리돼요.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bottom-section">
+                <div class="teacher-message">
+                    <p class="teacher-message__text">
+                        <strong>목적에 맞는 표현을 고르면 이해가 빨라져요.</strong> 
+                        리스트는 순서 중심, 타임라인은 시간 흐름 중심, 표는 정보 비교 중심입니다. 
+                        표에도 정렬된 행이 있으며, 열이 의미를 보강한다는 것을 기억하세요! 📊
+                    </p>
+                </div>
+
+                <div class="check-question">
+                    <h3 class="check-question__title">🤔 생각해보기</h3>
+                    <p class="check-question__content">
+                        시간 정보가 추가되면 어떤 장점이 생기나요?
+                    </p>
+                    <textarea 
+                        class="check-question__input" 
+                        rows="3" 
+                        placeholder="시간 정보 추가의 장점을 설명해보세요..."
+                        aria-label="시간 정보 추가 장점 설명"
+                        id="final-input"
+                    ></textarea>
+                </div>
+            </section>
+        </main>
+
+        <div class="transition-message" id="transition-message">
+            🎉 잘 이해했는지 <strong>퀵 퀴즈</strong>로 확인해봅시다!
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const representations = document.querySelectorAll('.representation');
+        const advantagesPanels = {
+            list: document.getElementById('advantages-list'),
+            timeline: document.getElementById('advantages-timeline'),
+            table: document.getElementById('advantages-table')
+        };
+        const finalInput = document.getElementById('final-input');
+        const transitionMessage = document.getElementById('transition-message');
+
+        // State
+        let selectedRepresentations = new Set();
+        let currentSelection = null;
+
+        // Select representation
+        function selectRepresentation(type) {
+            // Clear previous selections
+            representations.forEach(rep => {
+                rep.classList.remove('representation--selected');
+                const panelId = rep.dataset.type;
+                if (advantagesPanels[panelId]) {
+                    advantagesPanels[panelId].classList.remove('is-visible');
+                }
+            });
+            
+            // Set new selection
+            const selectedRep = document.querySelector(`[data-type="${type}"]`);
+            selectedRep.classList.add('representation--selected');
+            
+            // Show advantages panel
+            if (advantagesPanels[type]) {
+                setTimeout(() => {
+                    advantagesPanels[type].classList.add('is-visible');
+                }, 200);
+            }
+            
+            currentSelection = type;
+            selectedRepresentations.add(type);
+            
+            // Add highlight animation to selected representation
+            setTimeout(() => {
+                selectedRep.style.animation = 'none';
+                selectedRep.offsetHeight; // Trigger reflow
+                selectedRep.style.animation = 'pulse 1s ease-in-out';
+            }, 300);
+            
+            // Always trigger data consistency highlight for selected representation only
+            setTimeout(() => {
+                highlightDataConsistency(type);
+            }, 500);
+            
+            checkProgress();
+        }
+
+        // Highlight data consistency for specific representation
+        function highlightDataConsistency(representationType) {
+            let selector = '';
+            
+            switch(representationType) {
+                case 'list':
+                    selector = '.routine-list__item';
+                    break;
+                case 'timeline':
+                    selector = '.timeline__item';
+                    break;
+                case 'table':
+                    selector = '.routine-table tbody tr';
+                    break;
+                default:
+                    // If no specific type, highlight all (legacy behavior)
+                    selector = '.routine-list__item, .timeline__item, .routine-table tbody tr';
+            }
+            
+            const items = document.querySelectorAll(selector);
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.background = 'rgba(245, 158, 11, 0.3)';
+                    setTimeout(() => {
+                        item.style.background = '';
+                    }, 800);
+                }, index * 100);
+            });
+        }
+
+        // Check progress
+        function checkProgress() {
+            const hasExploredMultiple = selectedRepresentations.size >= 2;
+            const hasInput = finalInput.value.trim().length > 15;
+            
+            if (hasExploredMultiple && hasInput) {
+                showTransitionMessage();
+            }
+        }
+
+        // Show transition message
+        function showTransitionMessage() {
+            transitionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                transitionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Event listeners
+        representations.forEach(representation => {
+            representation.addEventListener('click', () => {
+                const type = representation.dataset.type;
+                selectRepresentation(type);
+            });
+            
+            representation.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const type = representation.dataset.type;
+                    selectRepresentation(type);
+                }
+            });
+            
+            // Hover effect for better UX
+            representation.addEventListener('mouseenter', () => {
+                if (!representation.classList.contains('representation--selected')) {
+                    representation.style.borderColor = '#F59E0B';
+                }
+            });
+            
+            representation.addEventListener('mouseleave', () => {
+                if (!representation.classList.contains('representation--selected')) {
+                    representation.style.borderColor = '';
+                }
+            });
+        });
+
+        finalInput.addEventListener('input', () => {
+            setTimeout(checkProgress, 500);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target === finalInput) return;
+            
+            switch(e.key) {
+                case '1':
+                    e.preventDefault();
+                    selectRepresentation('list');
+                    break;
+                case '2':
+                    e.preventDefault();
+                    selectRepresentation('timeline');
+                    break;
+                case '3':
+                    e.preventDefault();
+                    selectRepresentation('table');
+                    break;
+            }
+        });
+
+        // Auto-demonstration
+        setTimeout(() => {
+            if (selectedRepresentations.size === 0) {
+                selectRepresentation('list');
+            }
+        }, 2000);
+
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.02); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    })();
+    </script>
+</body>
+</html>
