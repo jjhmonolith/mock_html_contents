@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8페이지 — 실습1: 점심 줄 관리 미니앱</title>
+    <meta name="description" content="추가, 삭제, 삽입 연산을 직접 체험하며 예측과 확인을 통해 순차 데이터 연산을 학습하는 실습 페이지">
+    <meta property="og:title" content="8페이지 — 실습1: 점심 줄 관리 미니앱">
+    <meta property="og:description" content="추가, 삭제, 삽입 연산을 직접 체험하며 예측과 확인을 통해 순차 데이터 연산을 학습하는 실습 페이지">
+    <meta property="og:type" content="website">
+    <style>
+        /* 
+         * 페이지명: 점심 줄 관리 미니앱
+         * 버전: 1.0.0 
+         * 작성일: 2025-08-20
+         * ASSUMPTIONS: 
+         * - 16:9 무스크롤 스테이지 구조
+         * - 3단계 미션 시스템 (추가→삭제→삽입)
+         * - 예측/확인 패턴 학습
+         * - 1300px 기준 레이아웃 최적화
+         */
+        
+        :root {
+            --bg: #FFFFFF;
+            --surface: #F8FAFF;
+            --primary: #6366F1;
+            --secondary: #EC4899;
+            --accent: #10B981;
+            --warning: #F59E0B;
+            --success: #059669;
+            --danger: #EF4444;
+            --info: #3B82F6;
+            --purple: #8B5CF6;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-secondary: linear-gradient(135deg, #EC4899 0%, #BE185D 100%);
+            --gradient-accent: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --gradient-warning: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --gradient-info: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            --gradient-success: linear-gradient(135deg, #059669 0%, #047857 100%);
+            --transition: 300ms cubic-bezier(0.2, 0, 0.2, 1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 1rem;
+            z-index: 999;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+
+        .skip-link:focus {
+            left: 1rem;
+        }
+
+        /* 16:9 Stage */
+        #stage {
+            aspect-ratio: 16 / 9;
+            height: min(100dvh, 56.25vw);
+            max-width: 100vw;
+            min-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--gradient-warning);
+            color: white;
+            padding: 1rem;
+            flex-shrink: 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header__pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><circle cx="15" cy="10" r="3" fill="white" opacity="0.2"/><circle cx="35" cy="10" r="3" fill="white" opacity="0.15"/><circle cx="55" cy="10" r="3" fill="white" opacity="0.25"/><text x="75" y="12" font-size="8" fill="white" opacity="0.2">+/-</text></svg>') repeat;
+            animation: operations-flow 15s linear infinite;
+        }
+
+        @keyframes operations-flow {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100px); }
+        }
+
+        .header__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header__title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header__subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Mission Intro */
+        .mission-intro {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--warning);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .mission-intro__title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .mission-intro__description {
+            font-size: 0.875rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Main Activity Area */
+        .activity-area {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Lunch Line Display */
+        .line-display {
+            flex: 2;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .line-display__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .line-container {
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 2px dashed rgba(16, 185, 129, 0.3);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .lunch-line {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            min-height: 120px;
+            padding: 0.5rem;
+        }
+
+        .student-card {
+            background: linear-gradient(135deg, #F0F9FF 0%, #DBEAFE 100%);
+            border-radius: 0.75rem;
+            padding: 1rem 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--info);
+            transition: all var(--transition);
+            position: relative;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .student-card--new {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+            animation: appear 0.6s ease-out;
+        }
+
+        .student-card--removing {
+            border-color: var(--danger);
+            background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%);
+            animation: disappear 0.6s ease-out forwards;
+        }
+
+        .student-card--moving {
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+
+        @keyframes appear {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes disappear {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+        }
+
+        .student-card__index {
+            position: absolute;
+            top: -0.5rem;
+            left: -0.5rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: var(--info);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .student-card__avatar {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .student-card__name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Mission Controls */
+        .mission-controls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mission-panel {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--secondary);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mission-panel__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .mission-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .mission-item {
+            background: rgba(236, 72, 153, 0.05);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+
+        .mission-item:hover {
+            border-color: var(--secondary);
+            background: rgba(236, 72, 153, 0.1);
+        }
+
+        .mission-item--active {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, #FCE7F3 0%, #F9A8D4 100%);
+        }
+
+        .mission-item--completed {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+            opacity: 0.8;
+        }
+
+        .mission-item__header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mission-item__number {
+            width: 1.5rem;
+            height: 1.5rem;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .mission-item--completed .mission-item__number {
+            background: var(--success);
+        }
+
+        .mission-item__title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .mission-item__desc {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        /* Action Panel */
+        .action-panel {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+        }
+
+        .action-panel__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .prediction-area {
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+        }
+
+        .prediction-area__label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .prediction-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-family: inherit;
+            resize: none;
+        }
+
+        .prediction-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .btn--primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn--primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn--success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn--success:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Result Panel */
+        .result-panel {
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            border: 2px solid var(--warning);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .result-panel.is-visible {
+            opacity: 1;
+        }
+
+        .result-panel__title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-panel__content {
+            font-size: 0.75rem;
+            color: #92400E;
+            line-height: 1.4;
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: flex;
+            gap: 1rem;
+            flex-shrink: 0;
+            padding-top: 0.75rem;
+        }
+
+        .teacher-message {
+            flex: 2;
+            background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 2px solid var(--warning);
+            position: relative;
+        }
+
+        .teacher-message::before {
+            content: '👨‍🏫';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background: var(--warning);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .teacher-message__text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #92400E;
+            line-height: 1.6;
+            margin-top: 0.25rem;
+        }
+
+        /* Quiz Panel */
+        .quiz-panel {
+            flex: 1;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--info);
+            position: relative;
+        }
+
+        .quiz-panel::before {
+            content: '🤔';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background: var(--info);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .quiz-panel__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--info);
+            margin-bottom: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .quiz-panel__question {
+            font-size: 0.75rem;
+            color: var(--text);
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+        }
+
+        .quiz-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-family: inherit;
+            text-align: center;
+            transition: border-color var(--transition);
+        }
+
+        .quiz-input:focus {
+            outline: none;
+            border-color: var(--info);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .quiz-input--correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        /* Completion Message */
+        .completion-message {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-success);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all var(--transition);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .completion-message.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .activity-area {
+                flex-direction: column;
+            }
+
+            .lunch-line {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .bottom-section {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                flex-direction: row;
+            }
+
+            .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    
+    <div id="stage">
+        <header>
+            <div class="header__pattern"></div>
+            <span class="page-indicator">8/11</span>
+            <div class="header__content">
+                <h1 class="header__title">실습1: 점심 줄 관리 미니앱</h1>
+                <p class="header__subtitle">예측하고, 실행하고, 확인해봐요! 🍽️</p>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="mission-intro">
+                <h2 class="mission-intro__title">
+                    <span>🎯</span>
+                    3가지 미션 완료하기
+                </h2>
+                <p class="mission-intro__description">
+                    <strong>연산 전 예측</strong>을 써보고, <strong>실행 후 결과</strong>를 확인해보세요. 
+                    예측이 틀려도 괜찮아요! 왜 다른지 설명하면 됩니다.
+                </p>
+            </section>
+
+            <div class="activity-area">
+                <section class="line-display">
+                    <h3 class="line-display__title">
+                        <span>🍽️</span>
+                        점심 줄 현황
+                    </h3>
+                    
+                    <div class="line-container">
+                        <div class="lunch-line" id="lunch-line">
+                            <div class="student-card" data-name="민수">
+                                <div class="student-card__index">0</div>
+                                <div class="student-card__avatar">👦</div>
+                                <div class="student-card__name">민수</div>
+                            </div>
+                            <div class="student-card" data-name="지아">
+                                <div class="student-card__index">1</div>
+                                <div class="student-card__avatar">👧</div>
+                                <div class="student-card__name">지아</div>
+                            </div>
+                            <div class="student-card" data-name="준호">
+                                <div class="student-card__index">2</div>
+                                <div class="student-card__avatar">👦</div>
+                                <div class="student-card__name">준호</div>
+                            </div>
+                            <div class="student-card" data-name="아라">
+                                <div class="student-card__index">3</div>
+                                <div class="student-card__avatar">👧</div>
+                                <div class="student-card__name">아라</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="mission-controls">
+                    <div class="mission-panel">
+                        <h3 class="mission-panel__title">
+                            <span>📋</span>
+                            미션 목록
+                        </h3>
+                        
+                        <ol class="mission-list">
+                            <li class="mission-item mission-item--active" data-mission="1" tabindex="0">
+                                <div class="mission-item__header">
+                                    <div class="mission-item__number">1</div>
+                                    <div class="mission-item__title">끝에 '하늬' 추가</div>
+                                </div>
+                                <div class="mission-item__desc">맨 마지막 위치에 새 학생 추가</div>
+                            </li>
+                            <li class="mission-item" data-mission="2" tabindex="0">
+                                <div class="mission-item__header">
+                                    <div class="mission-item__number">2</div>
+                                    <div class="mission-item__title">2번째 학생 삭제</div>
+                                </div>
+                                <div class="mission-item__desc">인덱스 1번 학생 제거</div>
+                            </li>
+                            <li class="mission-item" data-mission="3" tabindex="0">
+                                <div class="mission-item__header">
+                                    <div class="mission-item__number">3</div>
+                                    <div class="mission-item__title">맨 앞에 '교생선생님' 삽입</div>
+                                </div>
+                                <div class="mission-item__desc">인덱스 0번 위치에 끼워넣기</div>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="action-panel">
+                        <h3 class="action-panel__title">미션 1: 끝에 '하늬' 추가</h3>
+                        
+                        <div class="prediction-area">
+                            <div class="prediction-area__label">예측: 연산 후 어떻게 될까요?</div>
+                            <textarea 
+                                class="prediction-input" 
+                                id="prediction-input"
+                                rows="2"
+                                placeholder="예: 하늬가 맨 뒤(인덱스 4번)에 추가될 것 같아요..."
+                            ></textarea>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn btn--primary" id="execute-btn" disabled>미션 실행하기</button>
+                            <button class="btn btn--success" id="confirm-btn" disabled>결과 확인 완료</button>
+                        </div>
+
+                        <div class="result-panel" id="result-panel">
+                            <div class="result-panel__title">실행 결과</div>
+                            <div class="result-panel__content" id="result-content">
+                                미션을 실행하면 결과가 여기에 표시됩니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="bottom-section">
+                <div class="teacher-message">
+                    <p class="teacher-message__text">
+                        <strong>예측이 틀려도 좋아요!</strong> 중요한 건 왜 다른지 설명하는 것입니다. 
+                        "맨 앞에 오면 모두 한 칸씩 밀려요" 같은 규칙을 발견해보세요. 
+                        추가가 항상 맨 뒤가 아니라 <strong>삽입 위치에 따라 다르다</strong>는 것도 기억하세요! 📝
+                    </p>
+                </div>
+
+                <div class="quiz-panel">
+                    <h3 class="quiz-panel__title">체크 질문</h3>
+                    <p class="quiz-panel__question">
+                        두 번째와 세 번째 사이에 끼우면, 
+                        뒤 요소들의 인덱스는 어떻게 될까요?
+                    </p>
+                    <input 
+                        type="text" 
+                        class="quiz-input" 
+                        id="quiz-input"
+                        placeholder="예: 한 칸씩 뒤로 밀린다"
+                        aria-label="체크 질문 답변"
+                    >
+                </div>
+            </section>
+        </main>
+
+        <div class="completion-message" id="completion-message">
+            🎉 모든 미션 완료! 이제 <strong>정렬</strong>로 넘어가볼까요?
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // DOM Elements
+        const lunchLine = document.getElementById('lunch-line');
+        const missionItems = document.querySelectorAll('.mission-item');
+        const actionPanel = document.querySelector('.action-panel');
+        const actionTitle = document.querySelector('.action-panel__title');
+        const predictionInput = document.getElementById('prediction-input');
+        const executeBtn = document.getElementById('execute-btn');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const resultPanel = document.getElementById('result-panel');
+        const resultContent = document.getElementById('result-content');
+        const quizInput = document.getElementById('quiz-input');
+        const completionMessage = document.getElementById('completion-message');
+
+        // State
+        let currentMission = 1;
+        let students = ['민수', '지아', '준호', '아라'];
+        let avatars = ['👦', '👧', '👦', '👧'];
+        let completedMissions = new Set();
+        let currentPrediction = '';
+        let missionExecuted = false;
+
+        // Mission configurations
+        const missions = {
+            1: {
+                title: "미션 1: 끝에 '하늬' 추가",
+                placeholder: "예: 하늬가 맨 뒤(인덱스 4번)에 추가될 것 같아요...",
+                action: () => addStudent('하늬', '👧'),
+                result: "하늬가 인덱스 4번 위치에 추가되었습니다. 기존 학생들은 그대로 있고, 배열 길이만 1 증가했어요!"
+            },
+            2: {
+                title: "미션 2: 2번째 학생 삭제",
+                placeholder: "예: 지아가 사라지고 뒤 학생들이 앞으로 당겨질 것 같아요...",
+                action: () => removeStudent(1),
+                result: "인덱스 1번 학생이 제거되고, 뒤의 모든 학생들이 한 칸씩 앞으로 당겨졌습니다. 인덱스가 자동으로 재조정되었어요!"
+            },
+            3: {
+                title: "미션 3: 맨 앞에 '교생선생님' 삽입",
+                placeholder: "예: 교생선생님이 맨 앞에 오고 모든 학생이 한 칸씩 밀릴 것 같아요...",
+                action: () => insertStudent(0, '교생선생님', '👨‍🏫'),
+                result: "인덱스 0번 위치에 교생선생님이 삽입되고, 기존 모든 학생들의 인덱스가 1씩 증가했습니다. 삽입은 기존 요소들을 밀어냅니다!"
+            }
+        };
+
+        // Initialize
+        function init() {
+            updateDisplay();
+            updateMissionUI();
+            setupEventListeners();
+        }
+
+        // Update line display
+        function updateDisplay() {
+            lunchLine.innerHTML = '';
+            
+            students.forEach((student, index) => {
+                const card = document.createElement('div');
+                card.className = 'student-card';
+                card.dataset.name = student;
+                
+                card.innerHTML = `
+                    <div class="student-card__index">${index}</div>
+                    <div class="student-card__avatar">${avatars[index]}</div>
+                    <div class="student-card__name">${student}</div>
+                `;
+                
+                lunchLine.appendChild(card);
+            });
+        }
+
+        // Add student to end
+        function addStudent(name, avatar) {
+            students.push(name);
+            avatars.push(avatar);
+            
+            updateDisplay();
+            
+            // Highlight new student
+            setTimeout(() => {
+                const newCard = lunchLine.lastElementChild;
+                newCard.classList.add('student-card--new');
+            }, 100);
+        }
+
+        // Remove student at index
+        function removeStudent(index) {
+            if (index >= 0 && index < students.length) {
+                const cardToRemove = lunchLine.children[index];
+                cardToRemove.classList.add('student-card--removing');
+                
+                setTimeout(() => {
+                    students.splice(index, 1);
+                    avatars.splice(index, 1);
+                    updateDisplay();
+                    
+                    // Highlight affected cards
+                    setTimeout(() => {
+                        Array.from(lunchLine.children).slice(index).forEach(card => {
+                            card.classList.add('student-card--moving');
+                            setTimeout(() => {
+                                card.classList.remove('student-card--moving');
+                            }, 300);
+                        });
+                    }, 100);
+                }, 300);
+            }
+        }
+
+        // Insert student at index
+        function insertStudent(index, name, avatar) {
+            students.splice(index, 0, name);
+            avatars.splice(index, 0, avatar);
+            
+            updateDisplay();
+            
+            // Highlight new and affected cards
+            setTimeout(() => {
+                Array.from(lunchLine.children).forEach((card, i) => {
+                    if (i === index) {
+                        card.classList.add('student-card--new');
+                    } else if (i > index) {
+                        card.classList.add('student-card--moving');
+                        setTimeout(() => {
+                            card.classList.remove('student-card--moving');
+                        }, 300);
+                    }
+                });
+            }, 100);
+        }
+
+        // Update mission UI
+        function updateMissionUI() {
+            // Update mission list
+            missionItems.forEach((item, index) => {
+                const missionNum = index + 1;
+                item.classList.remove('mission-item--active');
+                
+                if (completedMissions.has(missionNum)) {
+                    item.classList.add('mission-item--completed');
+                } else if (missionNum === currentMission) {
+                    item.classList.add('mission-item--active');
+                }
+            });
+
+            // Update action panel
+            if (missions[currentMission]) {
+                const mission = missions[currentMission];
+                actionTitle.textContent = mission.title;
+                predictionInput.placeholder = mission.placeholder;
+                predictionInput.value = '';
+                executeBtn.disabled = true;
+                confirmBtn.disabled = true;
+                resultPanel.classList.remove('is-visible');
+                missionExecuted = false;
+            }
+        }
+
+        // Execute current mission
+        function executeMission() {
+            if (missions[currentMission] && currentPrediction.trim()) {
+                missions[currentMission].action();
+                resultContent.textContent = missions[currentMission].result;
+                resultPanel.classList.add('is-visible');
+                
+                executeBtn.disabled = true;
+                confirmBtn.disabled = false;
+                missionExecuted = true;
+            }
+        }
+
+        // Complete current mission
+        function completeMission() {
+            completedMissions.add(currentMission);
+            
+            if (currentMission < 3) {
+                currentMission++;
+                updateMissionUI();
+            } else {
+                // All missions completed
+                showCompletionMessage();
+            }
+        }
+
+        // Show completion message
+        function showCompletionMessage() {
+            completionMessage.classList.add('is-visible');
+            setTimeout(() => {
+                completionMessage.classList.remove('is-visible');
+            }, 4000);
+        }
+
+        // Check quiz answer
+        function checkQuizAnswer() {
+            const answer = quizInput.value.trim().toLowerCase();
+            const correctAnswers = ['한 칸씩 뒤로', '뒤로 밀린다', '인덱스 증가', '1씩 증가'];
+            
+            const isCorrect = correctAnswers.some(correct => 
+                answer.includes(correct) || answer.includes('밀려')
+            );
+            
+            if (isCorrect) {
+                quizInput.classList.add('quiz-input--correct');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Mission selection
+            missionItems.forEach((item, index) => {
+                const missionNum = index + 1;
+                
+                item.addEventListener('click', () => {
+                    if (!completedMissions.has(missionNum)) {
+                        currentMission = missionNum;
+                        updateMissionUI();
+                    }
+                });
+                
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (!completedMissions.has(missionNum)) {
+                            currentMission = missionNum;
+                            updateMissionUI();
+                        }
+                    }
+                });
+            });
+
+            // Prediction input
+            predictionInput.addEventListener('input', () => {
+                currentPrediction = predictionInput.value.trim();
+                executeBtn.disabled = currentPrediction.length < 10;
+            });
+
+            // Execute button
+            executeBtn.addEventListener('click', executeMission);
+
+            // Confirm button
+            confirmBtn.addEventListener('click', completeMission);
+
+            // Quiz input
+            quizInput.addEventListener('input', checkQuizAnswer);
+            quizInput.addEventListener('blur', checkQuizAnswer);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case '1':
+                        if (!completedMissions.has(1)) {
+                            e.preventDefault();
+                            currentMission = 1;
+                            updateMissionUI();
+                            predictionInput.focus();
+                        }
+                        break;
+                    case '2':
+                        if (!completedMissions.has(2)) {
+                            e.preventDefault();
+                            currentMission = 2;
+                            updateMissionUI();
+                            predictionInput.focus();
+                        }
+                        break;
+                    case '3':
+                        if (!completedMissions.has(3)) {
+                            e.preventDefault();
+                            currentMission = 3;
+                            updateMissionUI();
+                            predictionInput.focus();
+                        }
+                        break;
+                    case 'Enter':
+                        if (e.target === predictionInput && !executeBtn.disabled) {
+                            e.preventDefault();
+                            executeMission();
+                        }
+                        break;
+                }
+            });
+        }
+
+        // Initialize
+        init();
+
+        // Auto-focus on prediction input
+        setTimeout(() => {
+            predictionInput.focus();
+        }, 1000);
+    })();
+    </script>
+</body>
+</html>
