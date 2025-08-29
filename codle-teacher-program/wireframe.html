@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코들 선도교사 프로그램 - 와이어프레임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1380px;
+            max-height: 750px;
+            margin: 0 auto;
+            position: relative;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .page {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            position: relative;
+        }
+        
+        .page.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3E88FF;
+        }
+        
+        .logos {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .logo-box {
+            width: 120px;
+            height: 40px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+        }
+        
+        .nav {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: #3E88FF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: #2d6dd4;
+        }
+        
+        .nav-indicator {
+            display: flex;
+            gap: 8px;
+            margin: 0 20px;
+            align-items: center;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: 0.3s;
+        }
+        
+        .dot.active {
+            background: #3E88FF;
+            width: 30px;
+            border-radius: 5px;
+        }
+        
+        /* Page 1 - 메인 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .main-title {
+            font-size: 48px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .main-subtitle {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        .character-box {
+            width: 200px;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Page 2 - 타임라인 */
+        .timeline {
+            flex: 1;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            padding: 40px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 4px;
+            background: #3E88FF;
+            z-index: 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            z-index: 1;
+            background: white;
+            padding: 20px;
+            border: 2px solid #3E88FF;
+            border-radius: 10px;
+            text-align: center;
+            width: 200px;
+        }
+        
+        /* Page 3 - 활동 내용 */
+        .activities {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            padding: 20px 0;
+        }
+        
+        .activity-card {
+            background: #f8f8f8;
+            padding: 30px;
+            border-radius: 10px;
+            border-left: 4px solid #3E88FF;
+        }
+        
+        /* Page 4 - 혜택 */
+        .benefits {
+            flex: 1;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .benefit-level {
+            flex: 1;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            min-height: 400px;
+        }
+        
+        .benefit-level.gold {
+            background: linear-gradient(135deg, #fff4e6 0%, #ffe0b2 100%);
+            border: 2px solid #ffa726;
+        }
+        
+        /* Page 5 - 참여 안내 */
+        .participation {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .cta-box {
+            background: #3E88FF;
+            color: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Page 1: 메인 페이지 -->
+    <div class="container">
+        <div class="page active" id="page1">
+            <div class="header">
+                <div class="logos">
+                    <div class="logo-box">코들 로고</div>
+                    <div class="logo-box">팀모노리스 로고</div>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <h1 class="main-title">코들 중학교 정보 선도교사 프로그램</h1>
+                <p class="main-subtitle">12주간의 특별한 여정에 초대합니다</p>
+                <div class="character-box">코들 캐릭터</div>
+                <p style="margin-top: 20px; color: #666;">온라인으로 진행되는 3개월 프로그램</p>
+            </div>
+        </div>
+        
+        <!-- Page 2: 프로그램 일정 -->
+        <div class="page" id="page2">
+            <div class="header">
+                <h2 style="color: #333;">프로그램 일정</h2>
+                <div class="logos">
+                    <div class="logo-box">코들 로고</div>
+                </div>
+            </div>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>1-4주</h3>
+                    <p>코들 활용 연수</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>5-6주</h3>
+                    <p>코들 활용 실습</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>7-9주</h3>
+                    <p>수업자료 공모전</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>10주</h3>
+                    <p>작품 평가</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>11-12주</h3>
+                    <p>활동 공유 및 마무리</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 3: 활동 내용 -->
+        <div class="page" id="page3">
+            <div class="header">
+                <h2 style="color: #333;">주요 활동 내용</h2>
+                <div class="logos">
+                    <div class="logo-box">코들 로고</div>
+                </div>
+            </div>
+            
+            <div class="activities">
+                <div class="activity-card">
+                    <h3>코들 활용 연수</h3>
+                    <p>1-4주차 집중 교육</p>
+                    <p style="margin-top: 10px; color: #666;">코들의 기본부터 심화 활용법까지</p>
+                </div>
+                <div class="activity-card">
+                    <h3>실습 기간</h3>
+                    <p>5-6주차 적용</p>
+                    <p style="margin-top: 10px; color: #666;">연수 내용을 바탕으로 직접 활용</p>
+                </div>
+                <div class="activity-card">
+                    <h3>수업자료 공모전</h3>
+                    <p>7-9주차 창작</p>
+                    <p style="margin-top: 10px; color: #666;">나만의 수업자료 제작 및 공유</p>
+                </div>
+                <div class="activity-card">
+                    <h3>평가 방식</h3>
+                    <p>10주차 투표</p>
+                    <p style="margin-top: 10px; color: #666;">참여 선생님들의 민주적 투표</p>
+                </div>
+                <div class="activity-card">
+                    <h3>우수작 선정</h3>
+                    <p>상위 3개 작품</p>
+                    <p style="margin-top: 10px; color: #666;">풍성한 선물 차등 지급</p>
+                </div>
+                <div class="activity-card">
+                    <h3>마무리</h3>
+                    <p>11-12주차</p>
+                    <p style="margin-top: 10px; color: #666;">활동 공유 및 네트워킹</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 4: 혜택 안내 -->
+        <div class="page" id="page4">
+            <div class="header">
+                <h2 style="color: #333;">참여 혜택</h2>
+                <div class="logos">
+                    <div class="logo-box">코들 로고</div>
+                </div>
+            </div>
+            
+            <div class="benefits">
+                <div class="benefit-level">
+                    <h3 style="color: #3E88FF; margin-bottom: 20px;">1단계</h3>
+                    <p style="font-weight: bold; margin-bottom: 15px;">활동 3회 이상 참여</p>
+                    <ul style="text-align: left; list-style: none; padding: 20px;">
+                        <li>✓ 다음 학기 코들 30% 할인</li>
+                        <li>✓ 수료증 발급</li>
+                    </ul>
+                </div>
+                <div class="benefit-level">
+                    <h3 style="color: #3E88FF; margin-bottom: 20px;">2단계</h3>
+                    <p style="font-weight: bold; margin-bottom: 15px;">연수 2회 이상 참여</p>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 15px;">(1단계 기준 충족 필수)</p>
+                    <ul style="text-align: left; list-style: none; padding: 20px;">
+                        <li>✓ 다음 학기 코들 50% 할인</li>
+                        <li>✓ 우수사례 공식 채널 소개</li>
+                    </ul>
+                </div>
+                <div class="benefit-level gold">
+                    <h3 style="color: #ff6b35; margin-bottom: 20px;">3단계 ⭐</h3>
+                    <p style="font-weight: bold; margin-bottom: 15px;">수행률 80% 이상</p>
+                    <ul style="text-align: left; list-style: none; padding: 20px;">
+                        <li>✓ 유료버전 10만원 특가 제공</li>
+                        <li>✓ 선도교사증 발급</li>
+                        <li>✓ 코들 선물박스</li>
+                        <li>✓ 팀모노리스 연수 강사 우선권</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 5: 참여 안내 -->
+        <div class="page" id="page5">
+            <div class="header">
+                <h2 style="color: #333;">참여 안내</h2>
+                <div class="logos">
+                    <div class="logo-box">코들 로고</div>
+                    <div class="logo-box">팀모노리스 로고</div>
+                </div>
+            </div>
+            
+            <div class="participation">
+                <h3 style="font-size: 32px; margin-bottom: 20px;">대상</h3>
+                <p style="font-size: 24px; color: #3E88FF; margin-bottom: 40px;">코들 활용 선도교사 선생님</p>
+                
+                <div class="cta-box">
+                    <h3 style="font-size: 28px; margin-bottom: 20px;">함께 만들어가는 교육의 미래</h3>
+                    <p style="font-size: 18px;">선생님의 참여를 기다립니다</p>
+                </div>
+                
+                <div class="character-box" style="margin-top: 40px;">여러 코들 캐릭터</div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="nav">
+            <button class="nav-btn" onclick="changePage(-1)">이전</button>
+            <div class="nav-indicator">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <button class="nav-btn" onclick="changePage(1)">다음</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentPage = 1;
+        const totalPages = 5;
+        
+        function changePage(direction) {
+            const pages = document.querySelectorAll('.page');
+            const dots = document.querySelectorAll('.dot');
+            
+            pages[currentPage - 1].classList.remove('active');
+            dots[currentPage - 1].classList.remove('active');
+            
+            currentPage += direction;
+            
+            if (currentPage < 1) currentPage = totalPages;
+            if (currentPage > totalPages) currentPage = 1;
+            
+            pages[currentPage - 1].classList.add('active');
+            dots[currentPage - 1].classList.add('active');
+        }
+        
+        // 키보드 네비게이션
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changePage(-1);
+            if (e.key === 'ArrowRight') changePage(1);
+        });
+    </script>
+</body>
+</html>

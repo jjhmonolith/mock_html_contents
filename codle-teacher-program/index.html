@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코들 중학교 정보 선도교사 프로그램</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 1600px;
+            height: 1000px;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            position: absolute;
+            top: 40px;
+            left: 60px;
+            right: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .logos {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 45px;
+            opacity: 0;
+            animation: slideDown 0.6s ease-out 0.3s forwards;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+            opacity: 0;
+            animation: slideDown 0.6s ease-out 0.4s forwards;
+        }
+        
+        .nav-link:hover {
+            color: #3E88FF;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            position: relative;
+        }
+        
+        .title-section {
+            text-align: center;
+            margin-bottom: 80px;
+            margin-top: 50px;
+        }
+        
+        .main-title {
+            font-size: 52px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: slideUp 0.8s ease-out 0.5s forwards;
+        }
+        
+        .main-subtitle {
+            font-size: 28px;
+            font-weight: 300;
+            color: #3E88FF;
+            margin-bottom: 15px;
+            opacity: 0;
+            animation: slideUp 0.8s ease-out 0.6s forwards;
+        }
+        
+        .main-description {
+            font-size: 18px;
+            color: #7f8c8d;
+            opacity: 0;
+            animation: slideUp 0.8s ease-out 0.7s forwards;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+        
+        .cta-button {
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #3E88FF 0%, #5B9AFF 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(62, 136, 255, 0.3);
+            text-decoration: none;
+            display: inline-block;
+            opacity: 0;
+            animation: slideUp 0.8s ease-out 0.9s forwards;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 136, 255, 0.4);
+        }
+        
+        .decorative-circles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.05;
+        }
+        
+        .circle1 {
+            width: 300px;
+            height: 300px;
+            background: #3E88FF;
+            top: -100px;
+            right: -100px;
+            animation: rotate 20s linear infinite;
+        }
+        
+        .circle2 {
+            width: 200px;
+            height: 200px;
+            background: #5B9AFF;
+            bottom: -50px;
+            left: -50px;
+            animation: rotate 15s linear infinite reverse;
+        }
+        
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @media (max-width: 1400px) {
+            .container {
+                transform: scale(0.9);
+            }
+        }
+        
+        @media (max-width: 1250px) {
+            .container {
+                transform: scale(0.8);
+            }
+        }
+        
+        @media (max-width: 1100px) {
+            .container {
+                transform: scale(0.7);
+            }
+        }
+    </style>
+    <script src="korean-typing.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="decorative-circles">
+            <div class="circle circle1"></div>
+            <div class="circle circle2"></div>
+        </div>
+        
+        <header class="header">
+            <div class="logos">
+                <img src="codle-logo.svg" alt="코들" class="logo">
+                <img src="teammonolith-logo.svg" alt="팀모노리스" class="logo">
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <img src="코들 캐릭터 png 모음/코들 캐릭터-01.png" alt="코들 캐릭터" style="width: 60px; height: 60px; object-fit: contain;">
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <div class="title-section">
+                <h1 class="main-title">코들 중학교 정보 선도교사 프로그램</h1>
+                <p class="main-subtitle">12주간의 특별한 여정에 초대합니다</p>
+                <p class="main-description">온라인으로 진행되는 3개월 집중 프로그램</p>
+            </div>
+            
+            <div class="character-gallery" style="display: flex; justify-content: center; gap: 60px; margin: 60px 0;">
+                <img src="코들 캐릭터 png 모음/코들 캐릭터-03.png" alt="코들 캐릭터" class="character-interactive" style="width: 180px; height: 180px; object-fit: contain; animation: float 3s ease-in-out infinite; cursor: pointer; transition: transform 0.3s;">
+                <img src="코들 캐릭터 png 모음/코들 캐릭터-14.png" alt="코들 캐릭터" class="character-interactive" style="width: 180px; height: 180px; object-fit: contain; animation: float 3s ease-in-out 0.5s infinite; cursor: pointer; transition: transform 0.3s;">
+                <img src="코들 캐릭터 png 모음/코들 캐릭터-29.png" alt="코들 캐릭터" class="character-interactive" style="width: 180px; height: 180px; object-fit: contain; animation: float 3s ease-in-out 1s infinite; cursor: pointer; transition: transform 0.3s;">
+            </div>
+            
+            <div class="cta-button" id="ctaBtn">12주 프로그램 안내</div>
+            
+            <div class="feature-cards" style="display: flex; gap: 40px; margin-top: 60px; padding: 0 100px; opacity: 0; animation: fadeIn 1s ease-out 1.2s forwards;">
+                <div class="feature-card" style="flex: 1; padding: 25px 35px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; text-align: center; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 32px; margin-bottom: 10px;">📚</div>
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; white-space: nowrap;">체계적인 연수</h4>
+                    <p style="color: #7f8c8d; font-size: 14px; white-space: nowrap;">기초부터 심화까지</p>
+                </div>
+                <div class="feature-card" style="flex: 1; padding: 25px 35px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; text-align: center; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 32px; margin-bottom: 10px;">🏆</div>
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; white-space: nowrap;">풍성한 혜택</h4>
+                    <p style="color: #7f8c8d; font-size: 14px; white-space: nowrap;">단계별 차등 지급</p>
+                </div>
+                <div class="feature-card" style="flex: 1; padding: 25px 35px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; text-align: center; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 32px; margin-bottom: 10px;">🤝</div>
+                    <h4 style="color: #2c3e50; margin-bottom: 8px; white-space: nowrap;">네트워킹</h4>
+                    <p style="color: #7f8c8d; font-size: 14px; white-space: nowrap;">선도교사 커뮤니티</p>
+                </div>
+            </div>
+        </main>
+        
+    </div>
+    
+    <script>
+        // 캐릭터 클릭 이벤트
+        document.querySelectorAll('.character-interactive').forEach(char => {
+            char.addEventListener('click', function() {
+                this.style.animation = 'none';
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 10);
+                
+                // 회전 효과
+                this.style.transform = 'rotate(360deg) scale(1.2)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+        });
+        
+        // CTA 버튼 클릭 효과
+        document.getElementById('ctaBtn').addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 100);
+            
+            // 파동 효과
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.width = '100px';
+            ripple.style.height = '100px';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(62, 136, 255, 0.3)';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.animation = 'rippleEffect 0.6s ease-out';
+            
+            const rect = this.getBoundingClientRect();
+            ripple.style.left = rect.left + rect.width / 2 + 'px';
+            ripple.style.top = rect.top + rect.height / 2 + 'px';
+            
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+        
+        // Feature 카드 호버 효과
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 15px 30px rgba(62, 136, 255, 0.2)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+        
+        // 한글 타이핑 효과
+        const title = document.querySelector('.main-title');
+        const text = title.textContent;
+        title.textContent = '';
+        
+        setTimeout(() => {
+            koreanTyping.type(title, text, 40);
+        }, 500);
+    </script>
+    
+    <style>
+        @keyframes rippleEffect {
+            from {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            to {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+</html>

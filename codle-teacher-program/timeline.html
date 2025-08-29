@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로그램 일정 - 코들 선도교사</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 1600px;
+            height: 1000px;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 40px 60px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2c3e50;
+            animation: slideRight 0.6s ease-out;
+        }
+        
+        @keyframes slideRight {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: #3E88FF;
+        }
+        
+        .timeline-container {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .timeline {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 0;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 3px;
+            background: linear-gradient(90deg, #3E88FF 0%, #5B9AFF 100%);
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+        
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0;
+            height: 3px;
+            background: #2c3e50;
+            transform: translateY(-50%);
+            animation: progressLine 3s ease-out forwards;
+        }
+        
+        @keyframes progressLine {
+            to {
+                width: 100%;
+            }
+        }
+        
+        .timeline-item {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .timeline-item:nth-child(1) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.6s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.8s; }
+        .timeline-item:nth-child(5) { animation-delay: 1s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .timeline-point {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 4px solid #3E88FF;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .timeline-item:hover .timeline-point {
+            transform: scale(1.3);
+            background: #3E88FF;
+        }
+        
+        .timeline-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            padding: 25px 20px;
+            margin: 0 10px;
+            transition: all 0.3s;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .timeline-item:hover .timeline-card {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(62, 136, 255, 0.2);
+            border-color: #3E88FF;
+        }
+        
+        .timeline-week {
+            font-size: 20px;
+            font-weight: 700;
+            color: #3E88FF;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .timeline-desc {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+        
+        .summary-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f6f9fc 0%, #e9f1ff 100%);
+            border-radius: 15px;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 1.2s forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .summary-text {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .summary-highlight {
+            font-size: 16px;
+            color: #3E88FF;
+            font-weight: 500;
+        }
+        
+        .logo {
+            height: 35px;
+        }
+        
+        @media (max-width: 1400px) {
+            .container {
+                transform: scale(0.9);
+            }
+        }
+        
+        @media (max-width: 1250px) {
+            .container {
+                transform: scale(0.8);
+            }
+        }
+        
+        @media (max-width: 1100px) {
+            .container {
+                transform: scale(0.7);
+            }
+        }
+    </style>
+    <script src="korean-typing.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div style="display: flex; align-items: center; gap: 30px;">
+                <h1 class="page-title">프로그램 일정</h1>
+                <img src="코들 캐릭터 png 모음/코들 캐릭터-05.png" alt="코들 캐릭터" style="width: 60px; height: 60px; object-fit: contain;">
+            </div>
+            <div class="logos">
+                <img src="codle-logo.svg" alt="코들" style="height: 35px;">
+            </div>
+        </header>
+        
+        <div class="timeline-container">
+            <div class="timeline">
+                <div class="timeline-line"></div>
+                
+                <div class="timeline-item" data-week="1-4">
+                    <div class="timeline-point"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-week">1-4주</div>
+                        <div class="timeline-title">코들 활용 연수</div>
+                        <div class="timeline-desc">기초부터 심화까지<br>체계적인 교육</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-week="5-6">
+                    <div class="timeline-point"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-week">5-6주</div>
+                        <div class="timeline-title">실습 기간</div>
+                        <div class="timeline-desc">연수 내용 적용<br>실제 활용해보기</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-week="7-9">
+                    <div class="timeline-point"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-week">7-9주</div>
+                        <div class="timeline-title">수업자료 공모전</div>
+                        <div class="timeline-desc">창의적인 수업자료<br>제작 및 공유</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-week="10">
+                    <div class="timeline-point"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-week">10주</div>
+                        <div class="timeline-title">작품 평가</div>
+                        <div class="timeline-desc">참여자 투표<br>우수작 선정</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-week="11-12">
+                    <div class="timeline-point"></div>
+                    <div class="timeline-card">
+                        <div class="timeline-week">11-12주</div>
+                        <div class="timeline-title">활동 공유</div>
+                        <div class="timeline-desc">경험 나눔<br>네트워킹</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <p class="summary-text">총 12주 동안 진행되는 체계적인 프로그램</p>
+                <p class="summary-highlight">매주 온라인으로 편리하게 참여하실 수 있습니다</p>
+            </div>
+        </div>
+        
+        
+    </div>
+    
+    <script>
+        // 페이지 타이틀 타이핑 애니메이션
+        window.addEventListener('DOMContentLoaded', function() {
+            const pageTitle = document.querySelector('.page-title');
+            if (pageTitle) {
+                const text = pageTitle.textContent;
+                pageTitle.textContent = '';
+                setTimeout(() => {
+                    koreanTyping.type(pageTitle, text, 60);
+                }, 300);
+            }
+        });
+        
+        // 타임라인 아이템 클릭 이벤트
+        function selectTimelineItem(item) {
+            // 모든 아이템 비활성화
+            document.querySelectorAll('.timeline-item').forEach(i => {
+                i.classList.remove('active');
+                const card = i.querySelector('.timeline-card');
+                const point = i.querySelector('.timeline-point');
+                card.style.background = '';
+                card.style.transform = '';
+                card.style.color = '';
+                point.style.background = '';
+                point.style.transform = '';
+            });
+            
+            // 선택한 아이템 활성화
+            item.classList.add('active');
+            const card = item.querySelector('.timeline-card');
+            const point = item.querySelector('.timeline-point');
+            card.style.background = 'linear-gradient(135deg, #3E88FF 0%, #5B9AFF 100%)';
+            card.style.color = 'white';
+            card.style.transform = 'scale(1.1) translateY(-10px)';
+            point.style.background = '#3E88FF';
+            point.style.transform = 'scale(1.5) translateY(-5px)';
+            
+            // 세부 정보 표시
+            showDetails(item.dataset.week);
+        }
+        
+        document.querySelectorAll('.timeline-item').forEach(item => {
+            item.addEventListener('click', function() {
+                selectTimelineItem(this);
+            });
+        });
+        
+        // 세부 정보 표시 함수
+        function showDetails(week) {
+            const details = {
+                '1-4': '📚 코들의 모든 기능을 마스터하는 시간',
+                '5-6': '💻 실제 수업에 적용하며 경험 축적',
+                '7-9': '🎨 창의적인 수업자료 제작',
+                '10': '🏆 공정한 평가를 통한 우수작 선정',
+                '11-12': '🤝 경험 공유와 네트워킹'
+            };
+            
+            const summaryText = document.querySelector('.summary-text');
+            if (summaryText && details[week]) {
+                summaryText.style.opacity = '0';
+                setTimeout(() => {
+                    summaryText.textContent = details[week];
+                    summaryText.style.opacity = '1';
+                }, 300);
+            }
+        }
+        
+        // 타임라인 진행 애니메이션
+        let currentWeek = 0;
+        const weeks = ['1-4', '5-6', '7-9', '10', '11-12'];
+        
+        function animateProgress() {
+            if (currentWeek < weeks.length) {
+                const item = document.querySelector(`[data-week="${weeks[currentWeek]}"]`);
+                const point = item.querySelector('.timeline-point');
+                
+                point.style.background = '#3E88FF';
+                point.style.transform = 'scale(1.5)';
+                
+                setTimeout(() => {
+                    point.style.transform = 'scale(1)';
+                    currentWeek++;
+                    animateProgress();
+                }, 500);
+            }
+        }
+        
+        // 페이지 로드 후 애니메이션 시작
+        setTimeout(animateProgress, 1500);
+        
+        // 첫 번째 아이템 기본 선택
+        window.addEventListener('load', function() {
+            const firstItem = document.querySelector('[data-week="1-4"]');
+            if (firstItem) {
+                selectTimelineItem(firstItem);
+            }
+        });
+        
+        // 마우스 호버 효과 개선
+        document.querySelectorAll('.timeline-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (!this.parentElement.classList.contains('active')) {
+                    this.style.background = 'linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (!this.parentElement.classList.contains('active')) {
+                    this.style.background = '';
+                }
+            });
+        });
+    </script>
+    
+    <style>
+        .timeline-item {
+            cursor: pointer;
+        }
+        
+        .timeline-card * {
+            pointer-events: none;
+        }
+        
+        .timeline-item.active .timeline-point {
+            background: #3E88FF !important;
+            transform: scale(1.5) translateY(-5px);
+            box-shadow: 0 5px 15px rgba(62, 136, 255, 0.4);
+        }
+        
+        .timeline-item.active .timeline-week,
+        .timeline-item.active .timeline-title,
+        .timeline-item.active .timeline-desc {
+            color: white !important;
+        }
+        
+        .summary-text {
+            transition: opacity 0.3s;
+        }
+    </style>
+</body>
+</html>

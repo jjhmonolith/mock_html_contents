@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>활동 내용 - 코들 선도교사</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 1600px;
+            height: 1000px;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 40px 60px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2c3e50;
+            animation: slideRight 0.6s ease-out;
+        }
+        
+        @keyframes slideRight {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 50px 60px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            flex: 1;
+        }
+        
+        .activity-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 30px;
+            border: 2px solid #f0f0f0;
+            position: relative;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            animation: fadeInScale 0.5s ease-out forwards;
+            overflow: hidden;
+        }
+        
+        .activity-card:nth-child(1) { animation-delay: 0.1s; }
+        .activity-card:nth-child(2) { animation-delay: 0.2s; }
+        .activity-card:nth-child(3) { animation-delay: 0.3s; }
+        .activity-card:nth-child(4) { animation-delay: 0.4s; }
+        .activity-card:nth-child(5) { animation-delay: 0.5s; }
+        .activity-card:nth-child(6) { animation-delay: 0.6s; }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .activity-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at top left, rgba(62, 136, 255, 0.08) 0%, transparent 50%);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+        
+        .activity-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3E88FF 0%, #5B9AFF 50%, #3E88FF 100%);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+        
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(62, 136, 255, 0.15);
+            border-color: #3E88FF;
+        }
+        
+        .activity-card:hover::before {
+            opacity: 1;
+        }
+        
+        .activity-card:hover::after {
+            transform: translateX(0);
+        }
+        
+        .activity-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .activity-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, rgba(62, 136, 255, 0.05) 0%, rgba(91, 154, 255, 0.1) 100%);
+            border: 2px solid rgba(62, 136, 255, 0.3);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(62, 136, 255, 0.1);
+        }
+        
+        .activity-card:hover .activity-icon {
+            background: linear-gradient(135deg, #3E88FF 0%, #5B9AFF 100%);
+            border-color: transparent;
+            transform: rotate(-5deg);
+        }
+        
+        .activity-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+        
+        .activity-period {
+            font-size: 26px;
+            color: #3E88FF;
+            font-weight: 700;
+            flex: 1;
+            text-align: right;
+            background: linear-gradient(135deg, #3E88FF 0%, #5B9AFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .activity-description {
+            font-size: 15px;
+            color: #7f8c8d;
+            line-height: 1.7;
+            flex: 1;
+        }
+        
+        .activity-highlight {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: rgba(62, 136, 255, 0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #3E88FF;
+            font-weight: 500;
+        }
+        
+        .logo {
+            height: 35px;
+        }
+        
+        .activity-card.selected {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+            border-color: #3E88FF !important;
+            border-width: 3px;
+        }
+        
+        .activity-card.selected::before {
+            opacity: 1 !important;
+        }
+        
+        .activity-card.selected::after {
+            transform: translateX(0) !important;
+        }
+        
+        @media (max-width: 1650px) {
+            .container {
+                transform: scale(0.9);
+            }
+        }
+        
+        @media (max-width: 1450px) {
+            .container {
+                transform: scale(0.8);
+            }
+        }
+        
+        @media (max-width: 1250px) {
+            .container {
+                transform: scale(0.7);
+            }
+        }
+    </style>
+    <script src="korean-typing.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div style="display: flex; align-items: center; gap: 30px;">
+                <h1 class="page-title">주요 활동 내용</h1>
+                <img src="코들 캐릭터 png 모음/코들 캐릭터-08.png" alt="코들 캐릭터" style="width: 60px; height: 60px; object-fit: contain;">
+            </div>
+            <div class="logos">
+                <img src="codle-logo.svg" alt="코들" class="logo">
+            </div>
+        </header>
+        
+        <div class="content-area">
+            <div class="activities-grid">
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-icon">📚</div>
+                        <p class="activity-period">1-4주차</p>
+                    </div>
+                    <h3 class="activity-title">코들 활용 연수</h3>
+                    <p class="activity-description">
+                        코들의 기본 기능부터 심화 활용법까지 체계적으로 학습합니다.<br>
+                        실제 수업에 바로 적용할 수 있는 실용적인 내용으로 구성되어 있습니다.
+                    </p>
+                    <div class="activity-highlight">
+                        💡 매주 2시간 온라인 연수
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-icon">💻</div>
+                        <p class="activity-period">5-6주차</p>
+                    </div>
+                    <h3 class="activity-title">실습 기간</h3>
+                    <p class="activity-description">
+                        연수에서 배운 내용을 직접 활용해보는 시간입니다.<br>
+                        실제 수업 상황에서 코들을 적용하며 경험을 쌓습니다.
+                    </p>
+                    <div class="activity-highlight">
+                        💡 자유로운 실습 및 피드백
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-icon">🎨</div>
+                        <p class="activity-period">7-9주차</p>
+                    </div>
+                    <h3 class="activity-title">수업자료 공모전</h3>
+                    <p class="activity-description">
+                        선생님만의 창의적인 수업자료를 제작합니다.<br>
+                        우수 작품은 공식 채널을 통해 전국의 선생님들과 공유됩니다.
+                    </p>
+                    <div class="activity-highlight">
+                        💡 개인 또는 시리즈 작품 제출
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-icon">🗳️</div>
+                        <p class="activity-period">10주차</p>
+                    </div>
+                    <h3 class="activity-title">작품 평가</h3>
+                    <p class="activity-description">
+                        참여 선생님들의 민주적인 투표로 우수작을 선정합니다.<br>
+                        상위 3개 작품에는 풍성한 상품이 차등 지급됩니다.
+                    </p>
+                    <div class="activity-highlight">
+                        💡 공정한 상호 평가 시스템
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-icon">🏆</div>
+                        <p class="activity-period">10주차</p>
+                    </div>
+                    <h3 class="activity-title">우수작 선정</h3>
+                    <p class="activity-description">
+                        투표 결과를 바탕으로 최종 우수작을 선정합니다.<br>
+                        선정된 작품은 코들 공식 자료로 활용됩니다.
+                    </p>
+                    <div class="activity-highlight">
+                        💡 상품 및 인증서 수여
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-icon">🤝</div>
+                        <p class="activity-period">11-12주차</p>
+                    </div>
+                    <h3 class="activity-title">활동 공유</h3>
+                    <p class="activity-description">
+                        12주간의 활동을 마무리하며 경험을 공유합니다.<br>
+                        네트워킹을 통해 지속적인 교류의 장을 만들어갑니다.
+                    </p>
+                    <div class="activity-highlight">
+                        💡 선도교사 커뮤니티 형성
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 한글 타이핑 효과
+        const pageTitle = document.querySelector('.page-title');
+        const titleText = pageTitle.textContent;
+        pageTitle.textContent = '';
+        
+        setTimeout(() => {
+            koreanTyping.type(pageTitle, titleText, 60);
+        }, 300);
+        
+        // 카드 클릭 이벤트
+        const cards = document.querySelectorAll('.activity-card');
+        let selectedCard = null;
+        
+        cards.forEach((card, index) => {
+            card.addEventListener('click', function() {
+                // 이전 선택 카드 초기화
+                if (selectedCard && selectedCard !== this) {
+                    selectedCard.style.transform = '';
+                    selectedCard.style.boxShadow = '';
+                    selectedCard.classList.remove('selected');
+                }
+                
+                // 현재 카드 토글
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                    selectedCard = null;
+                } else {
+                    this.classList.add('selected');
+                    this.style.transform = 'scale(1.05) translateY(-10px)';
+                    this.style.boxShadow = '0 20px 40px rgba(62, 136, 255, 0.3)';
+                    selectedCard = this;
+                    
+                    // 세부 정보 표시
+                    showActivityDetail(index);
+                }
+            });
+            
+            // 마우스 호버 효과
+            card.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 15px 30px rgba(62, 136, 255, 0.2)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                }
+            });
+        });
+        
+        // 활동 세부 정보 표시
+        function showActivityDetail(index) {
+            const details = [
+                '매주 화요일, 목요일 저녁 7시-9시 온라인 연수',
+                '연수 내용을 바탕으로 자유롭게 실습',
+                '개인 또는 팀 단위로 참여 가능',
+                '선생님들의 투표로 공정하게 평가',
+                '1등: 100만원 상당 상품, 2등: 50만원, 3등: 30만원',
+                '온라인 발표회 및 네트워킹 행사'
+            ];
+            
+            // 알림 메시지 표시
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = details[index];
+            tooltip.style.cssText = `
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #2c3e50;
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                font-size: 13px;
+                white-space: nowrap;
+                margin-bottom: 10px;
+                animation: tooltipFade 0.3s;
+                z-index: 10;
+            `;
+            
+            cards[index].style.position = 'relative';
+            cards[index].appendChild(tooltip);
+            
+            setTimeout(() => {
+                tooltip.remove();
+            }, 3000);
+        }
+        
+        // 아이콘 애니메이션
+        document.querySelectorAll('.activity-icon').forEach((icon, index) => {
+            icon.style.animation = `iconFloat 3s ease-in-out ${index * 0.2}s infinite`;
+        });
+    </script>
+    
+    <style>
+        @keyframes tooltipFade {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .activity-card {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .activity-card.selected {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+            border-color: #3E88FF !important;
+        }
+        
+        .activity-card.selected::before {
+            opacity: 1 !important;
+        }
+    </style>
+</body>
+</html>

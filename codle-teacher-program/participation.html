@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>함께 만드는 변화 - 코들 선도교사</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 1600px;
+            height: 1000px;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 40px 60px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2c3e50;
+            animation: slideRight 0.6s ease-out;
+        }
+        
+        @keyframes slideRight {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 80px 50px;
+            position: relative;
+        }
+        
+        .invitation-section {
+            text-align: center;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.3s forwards;
+            min-height: 130px;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .main-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: visible;
+        }
+        
+        .main-title span {
+            color: #3E88FF;
+            display: inline-block;
+            animation: colorPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes colorPulse {
+            0%, 100% {
+                color: #3E88FF;
+            }
+            50% {
+                color: #5B9AFF;
+            }
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        
+        .subtitle strong {
+            color: #3E88FF;
+            font-weight: 600;
+        }
+        
+        .vision-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .vision-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            opacity: 0;
+            animation: fadeInScale 0.6s ease-out forwards;
+        }
+        
+        .vision-card:nth-child(1) { animation-delay: 0.6s; }
+        .vision-card:nth-child(2) { animation-delay: 0.7s; }
+        .vision-card:nth-child(3) { animation-delay: 0.8s; }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .vision-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(62, 136, 255, 0.2);
+            border-color: #3E88FF;
+        }
+        
+        .vision-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes iconFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .vision-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .vision-desc {
+            font-size: 16px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        
+        .closing-message {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding: 30px;
+            background: linear-gradient(135deg, #3E88FF 0%, #5B9AFF 100%);
+            border-radius: 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1s forwards;
+        }
+        
+        .closing-message::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotate 30s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .closing-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .closing-text {
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
+            opacity: 0.95;
+        }
+        
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 3s linear infinite;
+        }
+        
+        @keyframes sparkle {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+        
+        @media (max-width: 1650px) {
+            .container {
+                transform: scale(0.9);
+            }
+        }
+        
+        @media (max-width: 1450px) {
+            .container {
+                transform: scale(0.8);
+            }
+        }
+        
+        @media (max-width: 1250px) {
+            .container {
+                transform: scale(0.7);
+            }
+        }
+    </style>
+    <script src="korean-typing.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div style="display: flex; align-items: center; gap: 30px;">
+                <h1 class="page-title">함께 만드는 변화</h1>
+                <img src="코들 캐릭터 png 모음/코들 캐릭터-20.png" alt="코들 캐릭터" style="width: 60px; height: 60px; object-fit: contain;">
+            </div>
+            <div class="logos">
+                <img src="codle-logo.svg" alt="코들" style="height: 35px;">
+                <img src="teammonolith-logo.svg" alt="팀모노리스" style="height: 35px;">
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="invitation-section">
+                <h2 class="main-title">
+                    교육에 <span>진심</span>인 선생님께 드리는 초대
+                </h2>
+                <p class="subtitle">
+                    선도교사 프로그램은 단순한 연수가 아닙니다.<br>
+                    <strong>대한민국 정보 교육의 미래를 함께 설계하는 여정입니다.</strong>
+                </p>
+            </div>
+            
+            
+            <div class="vision-cards">
+                <div class="vision-card">
+                    <div class="vision-icon">🌱</div>
+                    <h4 class="vision-title">교육 혁신의 씨앗</h4>
+                    <p class="vision-desc">
+                        선생님의 경험과 아이디어가<br>
+                        전국의 교실을 변화시키는<br>
+                        소중한 씨앗이 됩니다
+                    </p>
+                </div>
+                
+                <div class="vision-card">
+                    <div class="vision-icon">🔥</div>
+                    <h4 class="vision-title">열정의 공유</h4>
+                    <p class="vision-desc">
+                        같은 고민을 하는 동료들과<br>
+                        함께 성장하며 교육의<br>
+                        새로운 가능성을 발견합니다
+                    </p>
+                </div>
+                
+                <div class="vision-card">
+                    <div class="vision-icon">⭐</div>
+                    <h4 class="vision-title">미래를 여는 리더</h4>
+                    <p class="vision-desc">
+                        AI 시대, 학생들에게<br>
+                        진짜 필요한 역량을 키워주는<br>
+                        교육 리더가 되어주세요
+                    </p>
+                </div>
+            </div>
+            
+            <div class="closing-message">
+                <div class="sparkle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+                <div class="sparkle" style="top: 30%; right: 15%; animation-delay: 0.5s;"></div>
+                <div class="sparkle" style="bottom: 25%; left: 20%; animation-delay: 1s;"></div>
+                <div class="sparkle" style="bottom: 35%; right: 25%; animation-delay: 1.5s;"></div>
+                
+                <h3 class="closing-title">선생님의 한 걸음이 만드는 변화</h3>
+                <p class="closing-text">
+                    혼자가 아닌 함께, 작은 시작이 큰 변화로<br>
+                    선생님과 함께 만들어가는 교육의 내일을 기대합니다
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 비전 카드 호버 효과만
+        const visionCards = document.querySelectorAll('.vision-card');
+        
+        visionCards.forEach((card) => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 20px 40px rgba(62, 136, 255, 0.2)';
+                this.style.borderColor = '#3E88FF';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+                this.style.borderColor = '';
+            });
+        });
+        
+        // 마지막 메시지 클릭 효과
+        const closingMessage = document.querySelector('.closing-message');
+        closingMessage.addEventListener('click', function() {
+            // 감사 메시지
+            const thanks = document.createElement('div');
+            thanks.innerHTML = '💙 감사합니다, 선생님 💙';
+            thanks.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 36px;
+                font-weight: bold;
+                color: #3E88FF;
+                animation: thanksAnimation 3s;
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            
+            document.body.appendChild(thanks);
+            setTimeout(() => thanks.remove(), 3000);
+        });
+        
+        // 한글 타이핑 효과 및 타이틀 강조
+        const mainTitle = document.querySelector('.main-title');
+        const originalText = '교육에 진심인 선생님께 드리는 초대';
+        mainTitle.innerHTML = '';
+        
+        // 타이핑 효과 적용
+        setTimeout(() => {
+            // 먼저 일반 텍스트로 타이핑
+            const tempDiv = document.createElement('div');
+            tempDiv.style.display = 'inline';
+            mainTitle.appendChild(tempDiv);
+            
+            koreanTyping.type(tempDiv, originalText, 45, () => {
+                // 타이핑 완료 후 HTML 구조로 변경
+                mainTitle.innerHTML = '교육에 <span>진심</span>인 선생님께 드리는 초대';
+                
+                // 단어별 호버 효과 추가
+                const words = ['교육에', '진심인', '선생님께', '드리는', '초대'];
+                const newHTML = words.map(word => {
+                    if (word === '진심인') {
+                        return '<span class="word" style="display: inline-block; transition: all 0.3s;"><span>진심</span>인</span>';
+                    }
+                    return `<span class="word" style="display: inline-block; transition: all 0.3s;">${word}</span>`;
+                }).join(' ');
+                
+                mainTitle.innerHTML = newHTML;
+                
+                document.querySelectorAll('.word').forEach((word) => {
+                    word.addEventListener('mouseenter', function() {
+                        this.style.transform = 'scale(1.1)';
+                        if (!this.querySelector('span')) {
+                            this.style.color = '#3E88FF';
+                        }
+                    });
+                    
+                    word.addEventListener('mouseleave', function() {
+                        this.style.transform = '';
+                        this.style.color = '';
+                    });
+                });
+            });
+        }, 500);
+        
+        // 배경 별 효과
+        function createStar() {
+            const star = document.createElement('div');
+            star.style.cssText = `
+                position: fixed;
+                width: 2px;
+                height: 2px;
+                background: white;
+                border-radius: 50%;
+                pointer-events: none;
+                animation: starTwinkle 3s linear;
+            `;
+            
+            star.style.left = Math.random() * window.innerWidth + 'px';
+            star.style.top = Math.random() * window.innerHeight + 'px';
+            
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 3000);
+        }
+        
+        setInterval(createStar, 1000);
+    </script>
+    
+    <style>
+        @keyframes toastShow {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+        }
+        
+        @keyframes thanksAnimation {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2) rotate(5deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8) rotate(-5deg);
+            }
+        }
+        
+        @keyframes starTwinkle {
+            0% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        
+        
+        .closing-message {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .closing-message:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</body>
+</html>
